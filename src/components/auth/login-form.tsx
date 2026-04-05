@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Shield, Trophy } from "lucide-react"
@@ -60,7 +59,6 @@ export function LoginForm({
   redirectTo: string
   confirmation: boolean
 }) {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -92,8 +90,7 @@ export function LoginForm({
       }
 
       toast.success("Connexion réussie.")
-      router.replace(redirectTo)
-      router.refresh()
+      window.location.href = redirectTo
     } catch {
       toast.error("Connexion impossible pour le moment.")
     } finally {

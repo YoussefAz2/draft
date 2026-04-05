@@ -26,9 +26,12 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+  }
 
   const protectedPaths = ['/dashboard', '/profile', '/lobby', '/game'];
   const isProtected = protectedPaths.some((path) =>

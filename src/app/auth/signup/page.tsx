@@ -186,7 +186,9 @@ export default function SignupPage() {
         options: {
           data: { username },
           emailRedirectTo:
-            typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
+            typeof window !== "undefined"
+              ? `${window.location.origin}/auth/callback?next=/dashboard`
+              : undefined,
         },
       })
 
@@ -207,8 +209,7 @@ export default function SignupPage() {
       }
 
       toast.success("Compte créé. Bienvenue dans le draft.")
-      router.replace("/dashboard")
-      router.refresh()
+      window.location.href = "/dashboard"
     } catch {
       toast.error("Inscription impossible pour le moment.")
     } finally {

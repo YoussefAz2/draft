@@ -5,11 +5,20 @@ import { ResultsView } from "@/components/game/results-view"
 import { WaitingRoomClient } from "@/components/game/waiting-room-client"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import type { AuctionProfile } from "@/lib/hooks/use-auction"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import type { Database } from "@/lib/types/database"
 
 type Params = {
   id: string
 }
+
+type GameRow = Database["public"]["Tables"]["games"]["Row"]
+type GamePlayerRow = Pick<
+  Database["public"]["Tables"]["game_players"]["Row"],
+  "id" | "game_id" | "order_index" | "status" | "winning_bid" | "won_by" | "player_id"
+>
+type PlayerRow = Database["public"]["Tables"]["players"]["Row"]
 
 export default async function GamePage({
   params,
@@ -48,9 +57,19 @@ export default async function GamePage({
     redirect(`/auth/login?redirect=/game/${id}`)
   }
 
-  const { data: game, error } = await supabase.from("games").select("*").eq("id", id).maybeSingle()
+  let game: GameRow | null = null
+  try {
+    const gameResult = await supabase.from("games").select("*").eq("id", id).maybeSingle()
+    game = gameResult.data
 
-  if (error || !game) {
+    if (gameResult.error || !game) {
+      notFound()
+    }
+  } catch {
+    notFound()
+  }
+
+  if (!game) {
     notFound()
   }
 
@@ -59,26 +78,49 @@ export default async function GamePage({
   }
 
   const profileIds = [game.host_id, game.guest_id].filter((value): value is string => Boolean(value))
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, username, avatar_url, elo_rating")
-    .in("id", profileIds)
+  let profiles: AuctionProfile[] = []
 
-  if (game.status === "in_progress" || game.status === "completed") {
-    const { data: gamePlayers, error: gamePlayersError } = await supabase
-      .from("game_players")
-      .select("id, game_id, order_index, status, winning_bid, won_by, player_id")
-      .eq("game_id", game.id)
-      .order("order_index", { ascending: true })
+  try {
+    const profilesResult = await supabase
+      .from("profiles")
+      .select("id, username, avatar_url, elo_rating")
+      .in("id", profileIds)
 
-    if (gamePlayersError || !gamePlayers?.length) {
+    if (profilesResult.error) {
       notFound()
     }
 
-    const playerIds = [...new Set(gamePlayers.map((entry) => entry.player_id))]
-    const { data: players, error: playersError } = await supabase.from("players").select("*").in("id", playerIds)
+    profiles = profilesResult.data ?? []
+  } catch {
+    notFound()
+  }
 
-    if (playersError || !players?.length) {
+  if (game.status === "in_progress" || game.status === "completed") {
+    let gamePlayers: GamePlayerRow[] = []
+    let players: PlayerRow[] = []
+
+    try {
+      const gamePlayersResult = await supabase
+        .from("game_players")
+        .select("id, game_id, order_index, status, winning_bid, won_by, player_id")
+        .eq("game_id", game.id)
+        .order("order_index", { ascending: true })
+
+      if (gamePlayersResult.error || !gamePlayersResult.data?.length) {
+        notFound()
+      }
+
+      gamePlayers = gamePlayersResult.data
+
+      const playerIds = [...new Set(gamePlayers.map((entry) => entry.player_id))]
+      const playersResult = await supabase.from("players").select("*").in("id", playerIds)
+
+      if (playersResult.error || !playersResult.data?.length) {
+        notFound()
+      }
+
+      players = playersResult.data
+    } catch {
       notFound()
     }
 
@@ -126,7 +168,7 @@ export default async function GamePage({
         <ResultsView
           currentUserId={user.id}
           game={game}
-          profiles={profiles ?? []}
+          profiles={profiles}
           hostTeam={hostTeam}
           guestTeam={guestTeam}
         />
@@ -138,10 +180,10 @@ export default async function GamePage({
         currentUserId={user.id}
         initialGame={game}
         gamePlayers={hydratedGamePlayers}
-        profiles={profiles ?? []}
+        profiles={profiles}
       />
     )
   }
 
-  return <WaitingRoomClient currentUserId={user.id} initialGame={game} profiles={profiles ?? []} />
+  return <WaitingRoomClient currentUserId={user.id} initialGame={game} profiles={profiles} />
 }
