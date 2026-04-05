@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 
 import { AuctionView } from "@/components/game/auction-view"
+import { ResultsView } from "@/components/game/results-view"
 import { WaitingRoomClient } from "@/components/game/waiting-room-client"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -104,6 +105,33 @@ export default async function GamePage({
         }
       })
       .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+
+    if (game.status === "completed") {
+      const hostTeam = hydratedGamePlayers
+        .filter((entry) => entry.won_by === game.host_id && entry.winning_bid !== null)
+        .map((entry) => ({
+          player: entry.player,
+          bidAmount: entry.winning_bid ?? 0,
+          boughtBy: entry.won_by ?? "",
+        }))
+      const guestTeam = hydratedGamePlayers
+        .filter((entry) => entry.won_by === game.guest_id && entry.winning_bid !== null)
+        .map((entry) => ({
+          player: entry.player,
+          bidAmount: entry.winning_bid ?? 0,
+          boughtBy: entry.won_by ?? "",
+        }))
+
+      return (
+        <ResultsView
+          currentUserId={user.id}
+          game={game}
+          profiles={profiles ?? []}
+          hostTeam={hostTeam}
+          guestTeam={guestTeam}
+        />
+      )
+    }
 
     return (
       <AuctionView

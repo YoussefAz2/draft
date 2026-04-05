@@ -1,15 +1,16 @@
 "use client"
 
-import { Crown, Gavel, ShieldAlert, Trophy } from "lucide-react"
+import { Crown, Gavel, ShieldAlert } from "lucide-react"
 import { motion } from "framer-motion"
 
 import { BidControls } from "@/components/game/bid-controls"
 import { BidHistory } from "@/components/game/bid-history"
 import { PlayerCard } from "@/components/game/player-card"
+import { ResultsView } from "@/components/game/results-view"
 import { TeamPanel } from "@/components/game/team-panel"
 import { AuctionTimer } from "@/components/game/timer"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuction, type AuctionGamePlayer, type AuctionGameRow, type AuctionProfile } from "@/lib/hooks/use-auction"
 import { GAME_DEFAULTS } from "@/lib/types/game"
 import { cn } from "@/lib/utils"
@@ -61,40 +62,23 @@ export function AuctionView({
     ) : null
 
   if (state.phase === "game_over") {
+    const hostTeam = state.isHost ? state.myTeam : state.opponentTeam
+    const guestTeam = state.isHost ? state.opponentTeam : state.myTeam
+
     return (
-      <main className="mx-auto flex w-full max-w-7xl flex-1 items-center px-4 py-10 sm:px-6 lg:px-8">
-        <Card className="w-full border-white/10 bg-white/5 backdrop-blur-xl">
-          <CardHeader>
-            <Badge className="w-fit rounded-full border border-primary/20 bg-primary/10 text-primary">
-              Partie terminée
-            </Badge>
-            <CardTitle className="flex items-center gap-3 text-3xl text-white">
-              <Trophy className="size-8 text-amber-300" />
-              {state.roundLabel ?? "Résultat final"}
-            </CardTitle>
-            <CardDescription>
-              Budget final: {state.myBudget}M€ · Effectif: {state.myTeam.length}/{initialGame.team_size}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-6 xl:grid-cols-2">
-            <TeamPanel
-              title="Mon équipe"
-              subtitle="Composition finale"
-              budget={state.myBudget}
-              players={state.myTeam}
-              teamSize={initialGame.team_size}
-              isMe
-            />
-            <TeamPanel
-              title={state.opponentUsername}
-              subtitle="Composition finale"
-              budget={state.opponentBudget}
-              players={state.opponentTeam}
-              teamSize={initialGame.team_size}
-            />
-          </CardContent>
-        </Card>
-      </main>
+      <ResultsView
+        currentUserId={currentUserId}
+        game={{
+          ...initialGame,
+          status: "completed",
+          winner_id: state.lastWinnerId,
+          host_budget_remaining: state.hostBudgetRemaining,
+          guest_budget_remaining: state.guestBudgetRemaining,
+        }}
+        profiles={profiles}
+        hostTeam={hostTeam}
+        guestTeam={guestTeam}
+      />
     )
   }
 
