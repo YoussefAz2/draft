@@ -1,18 +1,16 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoginForm } from "@/components/auth/login-form"
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string; confirmation?: string }>
+}) {
+  const params = await searchParams
+
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
-      <Card className="w-full max-w-xl border-white/10 bg-white/5">
-        <CardHeader>
-          <Badge variant="secondary" className="w-fit rounded-full">Auth</Badge>
-          <CardTitle className="text-3xl">Connexion</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">
-          Coming soon.
-        </CardContent>
-      </Card>
-    </main>
-  );
+    <LoginForm
+      redirectTo={params.redirect || "/dashboard"}
+      confirmation={params.confirmation === "1"}
+    />
+  )
 }

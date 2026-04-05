@@ -32,25 +32,25 @@
 }
 
 :root {
-  --background: oklch(0.14 0.03 255);
-  --foreground: oklch(0.97 0.01 255);
-  --card: oklch(0.19 0.03 255);
-  --card-foreground: oklch(0.97 0.01 255);
-  --popover: oklch(0.16 0.03 255);
-  --popover-foreground: oklch(0.97 0.01 255);
-  --primary: oklch(0.78 0.17 150);
-  --primary-foreground: oklch(0.12 0.02 255);
-  --secondary: oklch(0.24 0.03 255);
-  --secondary-foreground: oklch(0.94 0.01 255);
-  --muted: oklch(0.22 0.03 255);
-  --muted-foreground: oklch(0.74 0.02 255);
-  --accent: oklch(0.27 0.04 190);
-  --accent-foreground: oklch(0.95 0.01 255);
-  --destructive: oklch(0.63 0.24 25);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.78 0.17 150 / 45%);
-  --radius: 0.9rem;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: rgba(17, 24, 39, 0.72);
+  --card-foreground: #f4f4f5;
+  --popover: rgba(9, 9, 11, 0.96);
+  --popover-foreground: #fafafa;
+  --primary: #22c55e;
+  --primary-foreground: #03130a;
+  --secondary: rgba(39, 39, 42, 0.95);
+  --secondary-foreground: #fafafa;
+  --muted: rgba(39, 39, 42, 0.75);
+  --muted-foreground: #a1a1aa;
+  --accent: rgba(245, 158, 11, 0.12);
+  --accent-foreground: #fef3c7;
+  --destructive: #f43f5e;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: rgba(34, 197, 94, 0.45);
+  --radius: 1rem;
 }
 
 .dark {
@@ -62,15 +62,25 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at top, color-mix(in srgb, var(--primary) 18%, transparent), transparent 30%),
-      linear-gradient(180deg, color-mix(in srgb, var(--background) 85%, black) 0%, var(--background) 100%);
+      radial-gradient(circle at top, rgba(34, 197, 94, 0.14), transparent 30%),
+      radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.12), transparent 18%),
+      linear-gradient(180deg, rgba(5, 5, 8, 0.98) 0%, rgba(9, 9, 11, 1) 100%);
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--primary) 40%, transparent);
+    background: rgba(34, 197, 94, 0.32);
     color: var(--foreground);
+  }
+
+  a,
+  button {
+    @apply transition-all duration-200;
   }
 }
