@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 
+import { AuctionView } from "@/components/game/auction-view"
+import { ResultsView } from "@/components/game/results-view"
 import { WaitingRoomClient } from "@/components/game/waiting-room-client"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -62,11 +64,84 @@ export default async function GamePage({
     .select("id, username, avatar_url, elo_rating")
     .in("id", profileIds)
 
-  return (
-    <WaitingRoomClient
-      currentUserId={user.id}
-      initialGame={game}
-      profiles={profiles ?? []}
-    />
-  )
+  if (game.status === "in_progress" || game.status === "completed") {
+    const { data: gamePlayers, error: gamePlayersError } = await supabase
+      .from("game_players")
+      .select("id, game_id, order_index, status, winning_bid, won_by, player_id")
+      .eq("game_id", game.id)
+      .order("order_index", { ascending: true })
+
+    if (gamePlayersError || !gamePlayers?.length) {
+      notFound()
+    }
+
+    const playerIds = [...new Set(gamePlayers.map((entry) => entry.player_id))]
+    const { data: players, error: playersError } = await supabase.from("players").select("*").in("id", playerIds)
+
+    if (playersError || !players?.length) {
+      notFound()
+    }
+
+    const playersMap = players.reduce<Record<number, (typeof players)[number]>>((accumulator, player) => {
+      accumulator[player.id] = player
+      return accumulator
+    }, {})
+
+    const hydratedGamePlayers = gamePlayers
+      .map((entry) => {
+        const player = playersMap[entry.player_id]
+        if (!player) {
+          return null
+        }
+
+        return {
+          id: entry.id,
+          game_id: entry.game_id,
+          order_index: entry.order_index,
+          status: entry.status,
+          winning_bid: entry.winning_bid,
+          won_by: entry.won_by,
+          player,
+        }
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+
+    if (game.status === "completed") {
+      const hostTeam = hydratedGamePlayers
+        .filter((entry) => entry.won_by === game.host_id && entry.winning_bid !== null)
+        .map((entry) => ({
+          player: entry.player,
+          bidAmount: entry.winning_bid ?? 0,
+          boughtBy: entry.won_by ?? "",
+        }))
+      const guestTeam = hydratedGamePlayers
+        .filter((entry) => entry.won_by === game.guest_id && entry.winning_bid !== null)
+        .map((entry) => ({
+          player: entry.player,
+          bidAmount: entry.winning_bid ?? 0,
+          boughtBy: entry.won_by ?? "",
+        }))
+
+      return (
+        <ResultsView
+          currentUserId={user.id}
+          game={game}
+          profiles={profiles ?? []}
+          hostTeam={hostTeam}
+          guestTeam={guestTeam}
+        />
+      )
+    }
+
+    return (
+      <AuctionView
+        currentUserId={user.id}
+        initialGame={game}
+        gamePlayers={hydratedGamePlayers}
+        profiles={profiles ?? []}
+      />
+    )
+  }
+
+  return <WaitingRoomClient currentUserId={user.id} initialGame={game} profiles={profiles ?? []} />
 }

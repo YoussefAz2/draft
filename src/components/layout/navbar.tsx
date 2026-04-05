@@ -100,7 +100,7 @@ function AuthControls({ mobile = false }: { mobile?: boolean }) {
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </div>
-        <Button variant="outline" size="lg" onClick={() => router.push("/dashboard")}>
+        <Button variant="outline" size="lg" onClick={() => router.push("/profile")}>
           <UserCircle2 className="size-4" />
           Profil
         </Button>
@@ -139,7 +139,7 @@ function AuthControls({ mobile = false }: { mobile?: boolean }) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+          <DropdownMenuItem onClick={() => router.push("/profile")}>
             Profil
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSignOut}>
