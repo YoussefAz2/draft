@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Football Auction Draft
 
-## Getting Started
+Application de draft fantasy football en mode enchères 1v1. Le dépôt est initialisé avec Next.js 15, Supabase, Tailwind CSS v4, shadcn/ui et un seed de 150 joueurs réels de la saison 2024/2025.
 
-First, run the development server:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YoussefAz2/draft)
+
+## Stack technique
+
+- Next.js 15 (App Router) + TypeScript
+- Tailwind CSS v4
+- shadcn/ui
+- Supabase (`@supabase/supabase-js` + `@supabase/ssr`)
+- Framer Motion
+- Lucide React
+
+## Guide de setup ultra-simple
+
+1. Créer un projet Supabase : https://supabase.com/dashboard
+2. Copier l'URL du projet et les clés depuis `Settings → API`
+3. Créer un fichier `.env.local` à partir de `.env.local.example`
+4. Installer et lancer le projet :
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+5. Aller dans `Supabase Dashboard → SQL Editor`
+6. Ouvrir `src/lib/schema.sql`, copier tout son contenu, le coller dans l'éditeur SQL, puis cliquer sur `Run`
+7. Visiter `http://localhost:3000/api/setup` pour seeder automatiquement les 150 joueurs
+
+## Variables d'environnement
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
+
+## Scripts utiles
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run lint
+npm run seed:players
+npm run setup:db
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `npm run seed:players` : insère les joueurs si la table `players` est vide
+- `npm run setup:db` : vérifie que le schéma SQL a bien été appliqué, puis seed les joueurs si nécessaire
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Déploiement Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Importer le dépôt dans Vercel
+2. Ajouter les 3 variables d'environnement Supabase
+3. Déployer
+4. Après le premier déploiement :
+   - exécuter `src/lib/schema.sql` dans le SQL Editor Supabase
+   - visiter `/api/setup` une seule fois pour seed les joueurs
 
-## Learn More
+## Structure du projet
 
-To learn more about Next.js, take a look at the following resources:
+```text
+/src
+  /app
+    layout.tsx
+    page.tsx
+    globals.css
+    /auth
+      /login/page.tsx
+      /signup/page.tsx
+    /dashboard/page.tsx
+    /game
+      /[id]/page.tsx
+    /lobby/page.tsx
+    /api
+      /setup/route.ts
+  /components
+    /ui
+    /game
+    /layout
+  /lib
+    /supabase
+      client.ts
+      server.ts
+      middleware.ts
+      admin.ts
+    /types
+      database.ts
+      game.ts
+      player.ts
+    /constants
+      game.ts
+    /utils
+      scoring.ts
+      helpers.ts
+    schema.sql
+  /data
+    players.ts
+  /scripts
+    seed-players.ts
+    setup-db.ts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Base de données
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Le schéma complet Supabase est stocké dans `src/lib/schema.sql`.
 
-## Deploy on Vercel
+Il crée :
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `profiles`
+- `players`
+- `games`
+- `game_players`
+- `bids`
+- la fonction `increment_profile_stats`
+- le trigger `handle_new_user`
+- les policies RLS
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Seed des joueurs
+
+- Dataset statique : `src/data/players.ts`
+- Total : **150 joueurs réels**
+- Répartition : 15 gardiens, 40 défenseurs, 50 milieux, 45 attaquants
+- Couverture : Premier League, Liga, Serie A, Bundesliga, Ligue 1, avec quelques stars hors top 5 pour compléter le pool
+
+## UI disponible
+
+shadcn/ui est configuré avec les composants suivants :
+
+- Button
+- Card
+- Input
+- Badge
+- Dialog
+- Dropdown Menu
+- Avatar
+- Skeleton
+- Separator
+
+## État du projet
+
+Les pages applicatives sont volontairement en placeholder avec un thème dark minimal et le texte `Coming soon.` pour accélérer l'initialisation du produit.

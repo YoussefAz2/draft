@@ -1,65 +1,84 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { ArrowRight, Shield, Trophy, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
-export default function Home() {
+const features = [
+  {
+    title: 'Draft live à 2 joueurs',
+    description: 'Enchères en temps réel, room code simple, budget limité et tours rapides.',
+    icon: Users,
+  },
+  {
+    title: 'Base joueurs 2024/2025',
+    description: '150 joueurs réels avec ratings, prix de base et distribution équilibrée.',
+    icon: Trophy,
+  },
+  {
+    title: 'Backend Supabase',
+    description: 'Auth, RLS, profils, parties, bids et setup simplifié après déploiement.',
+    icon: Shield,
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-12 sm:px-10">
+      <div className="flex flex-1 flex-col justify-center gap-10">
+        <div className="max-w-3xl space-y-6">
+          <Badge variant="secondary" className="rounded-full px-4 py-1 text-sm">
+            Football Auction Draft · Next.js 15 · Supabase
+          </Badge>
+          <div className="space-y-4">
+            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-6xl">
+              Le squelette du draft est prêt.
+            </h1>
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+              Projet initialisé avec App Router, Tailwind CSS v4, shadcn/ui,
+              Supabase SSR, endpoint de seed et dataset complet de 150 joueurs.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/api/setup"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Lancer le seed
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex h-8 items-center rounded-lg border border-border bg-background px-2.5 text-sm font-medium transition-colors hover:bg-muted"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Voir le dashboard placeholder
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <Separator />
+        <section className="grid gap-4 md:grid-cols-3">
+          {features.map(({ title, description, icon: Icon }) => (
+            <Card key={title} className="border-white/10 bg-white/5 backdrop-blur">
+              <CardHeader>
+                <div className="flex size-10 items-center justify-center rounded-full bg-primary/15 text-primary">
+                  <Icon className="size-5" />
+                </div>
+                <CardTitle>{title}</CardTitle>
+                <CardDescription>{description}</CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                Coming soon.
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+      </div>
+    </main>
   );
 }
