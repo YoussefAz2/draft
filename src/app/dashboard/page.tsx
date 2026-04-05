@@ -1,32 +1,63 @@
-import { redirect } from "next/navigation"
+import Link from "next/link"
 import { Crown, Swords, Target, Trophy } from "lucide-react"
+import { redirect } from "next/navigation"
 
 import { DashboardActions } from "@/components/dashboard/dashboard-actions"
+import { EloBadge } from "@/components/profile/elo-badge"
+import { GameHistoryCard } from "@/components/profile/game-history-card"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { buttonVariants } from "@/components/ui/button"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import type { Database } from "@/lib/types/database"
 import { GAME_MODES } from "@/lib/types/game"
+import { cn } from "@/lib/utils"
+import { formatRelativeTime, formatWinRate } from "@/lib/utils/profile"
 
-function getResultLabel(
-  userId: string,
-  game: { winner_id: string | null; status: string; host_id: string; guest_id: string | null },
-) {
-  if (game.status !== "completed") {
-    return "En cours"
-  }
+type RecentGame = Pick<
+  Database["public"]["Tables"]["games"]["Row"],
+  "id" | "mode" | "created_at" | "winner_id" | "host_id" | "guest_id" | "host_score" | "guest_score"
+> & {
+  host: { username: string } | null
+  guest: { username: string } | null
+  game_players: Array<{
+    won_by: string | null
+    player: { short_name: string; name: string } | null
+  }>
+}
 
+function getResultMeta(userId: string, game: RecentGame) {
   if (!game.winner_id) {
-    return "Nul"
+    return { label: "Égalité", tone: "neutral" as const }
   }
 
-  return game.winner_id === userId ? "Victoire" : "Défaite"
+  return game.winner_id === userId
+    ? { label: "Victoire", tone: "success" as const }
+    : { label: "Défaite", tone: "danger" as const }
+}
+
+function getOpponentName(userId: string, game: RecentGame) {
+  return userId === game.host_id ? game.guest?.username ?? "Adversaire" : game.host?.username ?? "Adversaire"
+}
+
+function getScoreLabel(userId: string, game: RecentGame) {
+  const myScore = userId === game.host_id ? game.host_score ?? 0 : game.guest_score ?? 0
+  const opponentScore = userId === game.host_id ? game.guest_score ?? 0 : game.host_score ?? 0
+
+  return `${myScore.toFixed(1)} - ${opponentScore.toFixed(1)}`
+}
+
+function getTeamPreview(userId: string, game: RecentGame) {
+  const names = game.game_players
+    .filter((entry) => entry.won_by === userId)
+    .map((entry) => entry.player?.short_name || entry.player?.name)
+    .filter((value): value is string => Boolean(value))
+
+  if (!names.length) {
+    return "Aucun joueur remporté"
+  }
+
+  return names.length > 3 ? `${names.slice(0, 3).join(", ")}...` : names.join(", ")
 }
 
 export default async function DashboardPage() {
@@ -65,46 +96,68 @@ export default async function DashboardPage() {
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase
       .from("games")
-      .select("id, mode, status, created_at, room_code, winner_id, host_id, guest_id")
+      .select(
+        `
+          id,
+          mode,
+          created_at,
+          winner_id,
+          host_id,
+          guest_id,
+          host_score,
+          guest_score,
+          host:profiles!host_id(username),
+          guest:profiles!guest_id(username),
+          game_players (
+            won_by,
+            player:players (short_name, name)
+          )
+        `,
+      )
       .or(`host_id.eq.${user.id},guest_id.eq.${user.id}`)
+      .eq("status", "completed")
       .order("created_at", { ascending: false })
-      .limit(5),
+      .limit(10),
   ])
 
+  const recentGames = (games ?? []) as unknown as RecentGame[]
   const username = profile?.username ?? user.email?.split("@")[0] ?? "Coach"
   const totalGames = profile?.total_games ?? 0
   const wins = profile?.wins ?? 0
-  const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0
-  const elo = profile?.elo_rating ?? 1000
-  const recentGames = games ?? []
+  const eloRating = profile?.elo_rating ?? 1000
+  const winRate = formatWinRate(wins, totalGames)
 
   const stats = [
     { label: "Parties jouées", value: totalGames, icon: Target },
     { label: "Victoires", value: wins, icon: Trophy },
-    { label: "Winrate", value: `${winRate}%`, icon: Swords },
-    { label: "ELO", value: elo, icon: Crown },
+    { label: "Winrate", value: winRate, icon: Swords },
+    { label: "ELO", value: eloRating, icon: Crown },
   ]
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="space-y-8">
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-          <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">
-            Dashboard
-          </Badge>
+          <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">Dashboard</Badge>
           <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <h1 className="text-4xl font-semibold text-white">Bienvenue, {username}! 👋</h1>
+              <h1 className="text-4xl font-semibold text-white">Bienvenue, {username}!</h1>
               <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                Prépare ta prochaine enchère, surveille ta progression et retrouve tes dernières parties.
+                Prépare ta prochaine enchère, surveille tes résultats et consulte ton historique compétitif.
               </p>
             </div>
-            {profileError ? (
-              <p className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm text-amber-300">
-                Profil partiellement indisponible.
-              </p>
-            ) : null}
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <EloBadge eloRating={eloRating} />
+              <Link href="/profile" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "rounded-2xl border-white/10 bg-white/5 hover:bg-white/10")}>
+                Voir mon profil
+              </Link>
+            </div>
           </div>
+          {profileError ? (
+            <p className="mt-4 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm text-amber-300">
+              Profil partiellement indisponible.
+            </p>
+          ) : null}
         </section>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -120,6 +173,7 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <CardTitle className="text-3xl text-white">{stat.value}</CardTitle>
+                  {stat.label === "ELO" ? <EloBadge eloRating={eloRating} className="mt-2 w-fit" /> : null}
                 </CardHeader>
               </Card>
             )
@@ -130,9 +184,7 @@ export default async function DashboardPage() {
           <Card className="border-white/10 bg-white/5 backdrop-blur-xl">
             <CardHeader>
               <CardTitle className="text-2xl text-white">Jouer une partie</CardTitle>
-              <CardDescription>
-                Choisis ton format de matchmaking et lance une nouvelle enchère.
-              </CardDescription>
+              <CardDescription>Choisis ton format de matchmaking et lance une nouvelle enchère.</CardDescription>
             </CardHeader>
             <CardContent>
               <DashboardActions />
@@ -143,46 +195,29 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle className="text-2xl text-white">Dernières parties</CardTitle>
               <CardDescription>
-                {gamesError
-                  ? "Impossible de charger l'historique pour le moment."
-                  : "Tes 5 dernières sessions de draft."}
+                {gamesError ? "Impossible de charger l'historique pour le moment." : "Tes 10 dernières parties terminées."}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {recentGames.length ? (
-                recentGames.map((game, index) => (
-                  <div key={game.id} className="space-y-4">
-                    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="space-y-1">
-                        <p className="font-medium text-white">
-                          {GAME_MODES[game.mode].icon} {GAME_MODES[game.mode].label}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {game.created_at
-                            ? new Intl.DateTimeFormat("fr-FR", {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              }).format(new Date(game.created_at))
-                            : "Date indisponible"}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="secondary" className="rounded-full border border-white/10 bg-white/5">
-                          {getResultLabel(user.id, game)}
-                        </Badge>
-                        <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">
-                          {game.status}
-                        </Badge>
-                        {game.room_code ? (
-                          <Badge variant="secondary" className="rounded-full border border-amber-400/20 bg-amber-400/10 text-amber-300">
-                            Code {game.room_code}
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </div>
-                    {index < recentGames.length - 1 ? <Separator className="bg-white/10" /> : null}
-                  </div>
-                ))
+                recentGames.map((game) => {
+                  const result = getResultMeta(user.id, game)
+
+                  return (
+                    <GameHistoryCard
+                      key={game.id}
+                      href={`/game/${game.id}`}
+                      resultLabel={result.label}
+                      resultTone={result.tone}
+                      opponentName={getOpponentName(user.id, game)}
+                      timestampLabel={formatRelativeTime(game.created_at)}
+                      scoreLabel={getScoreLabel(user.id, game)}
+                      modeLabel={GAME_MODES[game.mode].label}
+                      modeIcon={GAME_MODES[game.mode].icon}
+                      teamPreview={getTeamPreview(user.id, game)}
+                    />
+                  )
+                })
               ) : (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 px-5 py-8 text-center text-muted-foreground">
                   Aucune partie jouée. Lance ta première enchère !

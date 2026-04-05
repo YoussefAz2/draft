@@ -6,7 +6,7 @@ import { toast } from "sonner"
 
 import {
   advanceRound,
-  endGame,
+  finalizeGame,
   recordPlayerSold,
   recordPlayerUnsold,
 } from "@/app/game/actions"
@@ -359,11 +359,11 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
     }
 
     if (nextRound > current.totalRounds) {
-      const result = await endGame(current.gameId)
+      const result = await finalizeGame(current.gameId)
       await broadcast("game_over", {
         winnerId: result.winnerId,
-        hostScore: result.hostScore,
-        guestScore: result.guestScore,
+        hostScore: result.hostScore.totalScore,
+        guestScore: result.guestScore.totalScore,
         timestamp: Date.now(),
       })
       return
@@ -372,11 +372,11 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
     const nextGamePlayer = playersByOrder.find((entry) => entry.order_index === nextRound)
 
     if (!nextGamePlayer) {
-      const result = await endGame(current.gameId)
+      const result = await finalizeGame(current.gameId)
       await broadcast("game_over", {
         winnerId: result.winnerId,
-        hostScore: result.hostScore,
-        guestScore: result.guestScore,
+        hostScore: result.hostScore.totalScore,
+        guestScore: result.guestScore.totalScore,
         timestamp: Date.now(),
       })
       return
