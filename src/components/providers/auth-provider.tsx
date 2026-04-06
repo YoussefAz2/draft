@@ -9,7 +9,6 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
 
 import { createSupabaseClient } from "@/lib/supabase/client"
@@ -40,7 +39,6 @@ export function AuthProvider({
   initialProfile,
   isConfigured,
 }: AuthProviderProps) {
-  const router = useRouter()
   const supabase = useMemo(
     () => (isConfigured ? createSupabaseClient() : null),
     [isConfigured],
@@ -137,19 +135,23 @@ export function AuthProvider({
     }
 
     setLoading(true)
-    const { error } = await supabase.auth.signOut()
 
-    if (error) {
-      setLoading(false)
-      throw error
+    // Always attempt sign out but don't block on failure
+    // (e.g. when the account was deleted server-side, the API returns an error
+    // but we still need to clear local state and cookies)
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      // Ignore — we clear local state regardless
     }
 
     setUser(null)
     setProfile(null)
     setLoading(false)
-    router.push("/")
-    router.refresh()
-  }, [router, supabase])
+
+    // Hard redirect to ensure server sees cleared cookies
+    window.location.href = "/"
+  }, [supabase])
 
   const value = useMemo(
     () => ({ user, profile, loading, isConfigured, signOut }),
