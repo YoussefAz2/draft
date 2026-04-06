@@ -270,9 +270,9 @@ export interface Database {
           id: number;
           image_url: string | null;
           league: string;
-          mode_tags: Array<
-            'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'
-          >;
+          mode_tags:
+            | Array<'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'>
+            | null;
           name: string;
           nationality: string;
           nationality_flag: string | null;
@@ -313,9 +313,9 @@ export interface Database {
           id?: number;
           image_url?: string | null;
           league: string;
-          mode_tags?: Array<
-            'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'
-          >;
+          mode_tags?:
+            | Array<'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'>
+            | null;
           name: string;
           nationality: string;
           nationality_flag?: string | null;
@@ -356,9 +356,9 @@ export interface Database {
           id?: number;
           image_url?: string | null;
           league?: string;
-          mode_tags?: Array<
-            'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'
-          >;
+          mode_tags?:
+            | Array<'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'>
+            | null;
           name?: string;
           nationality?: string;
           nationality_flag?: string | null;
