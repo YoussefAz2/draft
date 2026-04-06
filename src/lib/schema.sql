@@ -53,10 +53,15 @@ CREATE TABLE IF NOT EXISTS players (
   base_price INTEGER NOT NULL DEFAULT 5,
   image_url TEXT,
   category TEXT NOT NULL DEFAULT 'star' CHECK (category IN ('star', 'legend', 'future', 'african', 'underrated')),
+  mode_tags TEXT[] NOT NULL DEFAULT ARRAY['star_players'],
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE players
+  ADD COLUMN IF NOT EXISTS mode_tags TEXT[] NOT NULL DEFAULT ARRAY['star_players'];
+
 CREATE INDEX IF NOT EXISTS idx_players_category ON players(category);
+CREATE INDEX IF NOT EXISTS idx_players_mode_tags ON players USING GIN (mode_tags);
 CREATE INDEX IF NOT EXISTS idx_players_rating ON players(overall_rating DESC);
 
 -- ============================================
