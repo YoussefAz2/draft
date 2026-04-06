@@ -13,6 +13,7 @@ import {
 import { createSupabaseClient } from "@/lib/supabase/client"
 import type { Database } from "@/lib/types/database"
 import { GAME_DEFAULTS } from "@/lib/types/game"
+import { playSound } from "@/lib/utils/sounds"
 
 export type AuctionGameRow = Database["public"]["Tables"]["games"]["Row"]
 export type AuctionPlayer = Database["public"]["Tables"]["players"]["Row"]
@@ -272,6 +273,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
   const revealTimeoutRef = useRef<number | null>(null)
   const resultTimeoutRef = useRef<number | null>(null)
   const disconnectTimeoutRef = useRef<number | null>(null)
+  const timerWarningRoundRef = useRef<number | null>(null)
 
   useEffect(() => {
     stateRef.current = state
@@ -328,6 +330,19 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
   }, [])
 
   useEffect(() => clearTimers, [clearTimers])
+
+  useEffect(() => {
+    if (state.phase !== "bidding" || state.timerSeconds > 3) {
+      return
+    }
+
+    if (timerWarningRoundRef.current === state.currentRound) {
+      return
+    }
+
+    timerWarningRoundRef.current = state.currentRound
+    playSound("timerWarning", 0.18)
+  }, [state.currentRound, state.phase, state.timerSeconds])
 
   const broadcast = useCallback(
     async <TEvent extends BroadcastEvent>(event: TEvent, payload: BroadcastEnvelopeMap[TEvent]) => {
@@ -561,6 +576,8 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
     channel.on("broadcast", { event: "new_round" }, ({ payload }) => {
       const next = payload as BroadcastEnvelopeMap["new_round"]
       finalizedRoundRef.current = null
+      timerWarningRoundRef.current = null
+      playSound("newRound", 0.22)
       setState((current) => ({
         ...current,
         currentRound: next.round,
@@ -585,6 +602,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
 
     channel.on("broadcast", { event: "bid" }, ({ payload }) => {
       const next = payload as BroadcastEnvelopeMap["bid"]
+      playSound("bid", 0.24)
       setState((current) => ({
         ...current,
         currentBid: next.amount,
@@ -639,6 +657,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
 
     channel.on("broadcast", { event: "player_sold" }, ({ payload }) => {
       const next = payload as BroadcastEnvelopeMap["player_sold"]
+      playSound("sold", 0.28)
       const soldGamePlayer = gamePlayersMap[next.gamePlayerId]
       if (!soldGamePlayer) {
         return
@@ -675,6 +694,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
 
     channel.on("broadcast", { event: "player_unsold" }, ({ payload }) => {
       const next = payload as BroadcastEnvelopeMap["player_unsold"]
+      playSound("unsold", 0.22)
       setState((current) => ({
         ...current,
         phase: "unsold",
@@ -688,6 +708,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
 
     channel.on("broadcast", { event: "game_over" }, ({ payload }) => {
       const next = payload as BroadcastEnvelopeMap["game_over"]
+      playSound(next.winnerId === stateRef.current.myId ? "victory" : "defeat", 0.3)
       setState((current) => ({
         ...current,
         phase: "game_over",

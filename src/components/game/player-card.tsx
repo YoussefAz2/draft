@@ -38,8 +38,8 @@ function StatRow({ label, value }: { label: string; value: number | null }) {
   const normalized = Math.max(0, Math.min(value ?? 0, 100))
 
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.24em]">
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] xl:text-[11px] xl:tracking-[0.24em]">
         <span>{label}</span>
         <span>{value ?? "--"}</span>
       </div>
@@ -62,51 +62,53 @@ export function PlayerCard({
   const theme = getCardTheme(player.overall_rating)
 
   return (
-    <div className="relative mx-auto w-full max-w-sm [perspective:1600px]">
+    <div className="relative mx-auto w-full max-w-xs xl:max-w-sm [perspective:1600px]">
       <motion.div
         initial={false}
         animate={{ rotateY: isRevealing ? 180 : 0 }}
         transition={{ duration: 1, ease: "easeInOut" }}
-        className="relative min-h-[31rem] w-full [transform-style:preserve-3d]"
+        className="relative min-h-[26rem] w-full [transform-style:preserve-3d] xl:min-h-[31rem]"
       >
-        <div className="absolute inset-0 rounded-[2rem] border border-white/10 bg-white/5 p-6 [backface-visibility:hidden]">
+        <div className="absolute inset-0 rounded-[2rem] border border-white/10 bg-white/5 p-5 xl:p-6 [backface-visibility:hidden]">
           <div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-white/15 bg-black/35">
-            <div className="flex size-28 items-center justify-center rounded-full border border-white/10 bg-white/5 text-6xl font-black text-white/80">
+            <div className="flex size-24 items-center justify-center rounded-full border border-white/10 bg-white/5 text-5xl font-black text-white/80 xl:size-28 xl:text-6xl">
               ?
             </div>
-            <p className="mt-6 text-xl font-semibold text-white">Prochain joueur...</p>
+            <p className="mt-5 text-lg font-semibold text-white xl:mt-6 xl:text-xl">Prochain joueur...</p>
             <p className="mt-2 text-center text-sm text-muted-foreground">Qui sera-ce ?</p>
           </div>
         </div>
 
         <div
           className={cn(
-            "absolute inset-0 rounded-[2rem] border border-white/15 bg-gradient-to-br p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]",
+            "absolute inset-0 rounded-[2rem] border border-white/15 bg-gradient-to-br p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] xl:p-6",
             theme.shell,
             theme.glow,
           )}
         >
-          <div className="relative flex h-full flex-col rounded-[1.5rem] border border-white/20 bg-black/10 p-5 backdrop-blur-sm">
+          <div className="relative flex h-full flex-col rounded-[1.5rem] border border-white/20 bg-black/10 p-4 backdrop-blur-sm xl:p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-5xl font-black leading-none">{player.overall_rating}</p>
-                <p className="mt-1 text-sm font-semibold uppercase tracking-[0.3em]">{player.position}</p>
+                <p className="text-4xl font-black leading-none xl:text-5xl">{player.overall_rating}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.26em] xl:text-sm xl:tracking-[0.3em]">{player.position}</p>
               </div>
             </div>
 
-            <div className="mt-8 flex flex-1 flex-col justify-between">
+            <div className="mt-6 flex flex-1 flex-col justify-between xl:mt-8">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.26em] opacity-75">Nom</p>
-                <p className="mt-1 text-3xl font-black uppercase tracking-[0.08em]">{player.short_name || player.name}</p>
-                <p className="mt-3 text-base font-semibold">{player.club}</p>
-                <p className="text-sm opacity-80">{player.league}</p>
-                <div className="mt-4 flex items-center gap-2 text-base font-semibold">
-                  <span className="text-2xl">{player.nationality_flag ?? "🏳️"}</span>
+                <p className="text-[10px] uppercase tracking-[0.22em] opacity-75 xl:text-[11px] xl:tracking-[0.26em]">Nom</p>
+                <p className="mt-1 text-2xl font-black uppercase tracking-[0.06em] xl:text-3xl xl:tracking-[0.08em]">
+                  {player.short_name || player.name}
+                </p>
+                <p className="mt-2 text-sm font-semibold xl:mt-3 xl:text-base">{player.club}</p>
+                <p className="text-xs opacity-80 xl:text-sm">{player.league}</p>
+                <div className="mt-3 flex items-center gap-2 text-sm font-semibold xl:mt-4 xl:text-base">
+                  <span className="text-xl xl:text-2xl">{player.nationality_flag ?? "🏳️"}</span>
                   <span>{player.nationality}</span>
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-5 grid grid-cols-2 gap-2.5 xl:mt-6 xl:gap-3">
                 <StatRow label="PAC" value={player.pace} />
                 <StatRow label="SHO" value={player.shooting} />
                 <StatRow label="PAS" value={player.passing} />
