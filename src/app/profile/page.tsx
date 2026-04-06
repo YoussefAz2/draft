@@ -90,34 +90,50 @@ export default async function ProfilePage() {
     redirect("/auth/login?redirect=/profile")
   }
 
-  const [{ data: profile, error: profileError }, { data: games, error: gamesError }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    supabase
-      .from("games")
-      .select(
-        `
-          id,
-          mode,
-          created_at,
-          winner_id,
-          host_id,
-          guest_id,
-          host_score,
-          guest_score,
-          host:profiles!host_id(username),
-          guest:profiles!guest_id(username),
-          game_players (
-            won_by,
-            player:players (short_name, name)
-          )
-        `,
-      )
-      .or(`host_id.eq.${user.id},guest_id.eq.${user.id}`)
-      .eq("status", "completed")
-      .order("created_at", { ascending: false }),
-  ])
+  let profile = null
+  let profileError: { message: string } | null = null
+  let history: HistoryGame[] = []
+  let gamesError: { message: string } | null = null
 
-  const history = (games ?? []) as unknown as HistoryGame[]
+  try {
+    const [profileResult, gamesResult] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("games")
+        .select(
+          `
+            id,
+            mode,
+            created_at,
+            winner_id,
+            host_id,
+            guest_id,
+            host_score,
+            guest_score,
+            host:profiles!host_id(username),
+            guest:profiles!guest_id(username),
+            game_players (
+              won_by,
+              player:players (short_name, name)
+            )
+          `,
+        )
+        .or(`host_id.eq.${user.id},guest_id.eq.${user.id}`)
+        .eq("status", "completed")
+        .order("created_at", { ascending: false }),
+    ])
+
+    profile = profileResult.data
+    profileError = profileResult.error
+      ? { message: profileResult.error.message }
+      : null
+    history = (gamesResult.data ?? []) as unknown as HistoryGame[]
+    gamesError = gamesResult.error ? { message: gamesResult.error.message } : null
+  } catch {
+    profileError = { message: "Impossible de charger les données" }
+    gamesError = { message: "Impossible de charger l'historique" }
+  }
+
   const username = profile?.username ?? user.email?.split("@")[0] ?? "Coach"
   const eloRating = profile?.elo_rating ?? 1000
   const totalGames = profile?.total_games ?? 0

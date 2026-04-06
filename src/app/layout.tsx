@@ -55,21 +55,26 @@ export default async function RootLayout({
   let initialProfile: Database["public"]["Tables"]["profiles"]["Row"] | null = null
 
   if (isConfigured) {
-    const supabase = await createSupabaseServerClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    try {
+      const supabase = await createSupabaseServerClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-    initialUser = user
+      initialUser = user
 
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle()
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle()
 
-      initialProfile = profile
+        initialProfile = profile
+      }
+    } catch {
+      initialUser = null
+      initialProfile = null
     }
   }
 
