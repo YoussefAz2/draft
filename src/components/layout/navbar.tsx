@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { href: "/", label: "Accueil" },
   { href: "/lobby", label: "Jouer" },
+  { href: "/leaderboard", label: "Classement" },
 ]
 
 function getInitials(value?: string | null) {
