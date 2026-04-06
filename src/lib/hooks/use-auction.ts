@@ -167,7 +167,9 @@ function buildInitialState(gameId: string, userId: string, options?: UseAuctionO
   const isHost = hostId === userId
   const opponentId = isHost ? guestId : hostId
   const players = [...(options?.gamePlayers ?? [])].sort((left, right) => left.order_index - right.order_index)
-  const soldPlayers = players.filter((entry) => entry.status === "sold" && entry.won_by && entry.winning_bid)
+  const soldPlayers = players.filter(
+    (entry) => entry.status === "sold" && entry.won_by !== null && entry.winning_bid !== null,
+  )
   const myTeam = soldPlayers
     .filter((entry) => entry.won_by === userId)
     .map((entry) => ({ player: entry.player, bidAmount: entry.winning_bid ?? 0, boughtBy: entry.won_by ?? "" }))
@@ -180,10 +182,7 @@ function buildInitialState(gameId: string, userId: string, options?: UseAuctionO
     null
   const currentPlayer = currentGamePlayer?.player ?? null
   const currentBid = initialGame?.current_bid ?? 0
-  const minimumBid = Math.max(
-    currentBid + GAME_DEFAULTS.MIN_BID_INCREMENT,
-    currentPlayer?.base_price ?? GAME_DEFAULTS.MIN_BID_INCREMENT,
-  )
+  const minimumBid = minimumBidForPlayer(currentPlayer, currentBid, initialGame?.current_bidder_id != null)
   const timerEnd = initialGame?.bid_timer_end ? new Date(initialGame.bid_timer_end).getTime() : Date.now()
 
   return {
@@ -230,17 +229,21 @@ function buildInitialState(gameId: string, userId: string, options?: UseAuctionO
   }
 }
 
-function minimumBidForPlayer(player: AuctionPlayer | null, currentBid: number) {
-  return Math.max(currentBid + GAME_DEFAULTS.MIN_BID_INCREMENT, player?.base_price ?? GAME_DEFAULTS.MIN_BID_INCREMENT)
+function minimumBidForPlayer(_player: AuctionPlayer | null, currentBid: number, hasBid = false) {
+  if (!hasBid) {
+    return 0
+  }
+
+  return currentBid + GAME_DEFAULTS.MIN_BID_INCREMENT
 }
 
 
-function getReserveNeededAfterPurchase(teamSize: number, currentTeamSize: number) {
-  return Math.max(teamSize - currentTeamSize - 1, 0) * GAME_DEFAULTS.MIN_BID_INCREMENT
+function getReserveNeededAfterPurchase() {
+  return 0
 }
 
-function canAffordAtAmount(amount: number, budget: number, teamSize: number, currentTeamSize: number) {
-  return budget >= amount && budget - amount >= getReserveNeededAfterPurchase(teamSize, currentTeamSize)
+function canAffordAtAmount(amount: number, budget: number) {
+  return budget >= amount && budget - amount >= getReserveNeededAfterPurchase()
 }
 
 function replaceTeamEntry(team: SoldPlayer[], soldPlayer: SoldPlayer) {
@@ -350,6 +353,17 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
     }, REVEAL_DURATION_MS)
   }, [])
 
+  const finishGame = useCallback(async () => {
+    const current = stateRef.current
+    const result = await finalizeGame(current.gameId)
+    await broadcast("game_over", {
+      winnerId: result.winnerId,
+      hostScore: result.hostScore.totalScore,
+      guestScore: result.guestScore.totalScore,
+      timestamp: Date.now(),
+    })
+  }, [broadcast])
+
   const moveToNextRound = useCallback(async () => {
     const current = stateRef.current
     const nextRound = current.currentRound + 1
@@ -358,27 +372,20 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
       return
     }
 
+    if (current.myTeam.length >= teamSize && current.opponentTeam.length >= teamSize) {
+      await finishGame()
+      return
+    }
+
     if (nextRound > current.totalRounds) {
-      const result = await finalizeGame(current.gameId)
-      await broadcast("game_over", {
-        winnerId: result.winnerId,
-        hostScore: result.hostScore.totalScore,
-        guestScore: result.guestScore.totalScore,
-        timestamp: Date.now(),
-      })
+      await finishGame()
       return
     }
 
     const nextGamePlayer = playersByOrder.find((entry) => entry.order_index === nextRound)
 
     if (!nextGamePlayer) {
-      const result = await finalizeGame(current.gameId)
-      await broadcast("game_over", {
-        winnerId: result.winnerId,
-        hostScore: result.hostScore.totalScore,
-        guestScore: result.guestScore.totalScore,
-        timestamp: Date.now(),
-      })
+      await finishGame()
       return
     }
 
@@ -397,7 +404,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
       reason: "new_round",
       timestamp: Date.now(),
     })
-  }, [broadcast, playersByOrder])
+  }, [broadcast, finishGame, playersByOrder, teamSize])
 
   const finalizeUnsold = useCallback(
     async (reasonLabel = "Joueur passé") => {
@@ -489,15 +496,19 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
       return
     }
 
-    const hostTeamSize = current.isHost ? current.myTeam.length : current.opponentTeam.length
-    const guestTeamSize = current.isHost ? current.opponentTeam.length : current.myTeam.length
+    const hostTeamSize = current.myTeam.length
+    const guestTeamSize = current.opponentTeam.length
     const hostBudget = current.hostBudgetRemaining
     const guestBudget = current.guestBudgetRemaining
-    const basePrice = current.currentPlayer.base_price
     const hostFull = hostTeamSize >= teamSize
     const guestFull = guestTeamSize >= teamSize
-    const hostEligible = !hostFull && canAffordAtAmount(basePrice, hostBudget, teamSize, hostTeamSize)
-    const guestEligible = !guestFull && canAffordAtAmount(basePrice, guestBudget, teamSize, guestTeamSize)
+    const hostEligible = !hostFull && canAffordAtAmount(0, hostBudget)
+    const guestEligible = !guestFull && canAffordAtAmount(0, guestBudget)
+
+    if (hostFull && guestFull) {
+      await finishGame()
+      return
+    }
 
     if (!hostEligible && !guestEligible) {
       await finalizeUnsold("Aucun budget disponible")
@@ -505,22 +516,14 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
     }
 
     if (hostEligible && !guestEligible) {
-      await finalizeSold(
-        options.initialGame.host_id,
-        guestFull ? GAME_DEFAULTS.MIN_BID_INCREMENT : basePrice,
-        guestFull ? "Attribué automatiquement" : "Seul enchérisseur restant",
-      )
+      await finalizeSold(options.initialGame.host_id, 0, "Attribué automatiquement")
       return
     }
 
     if (!hostEligible && guestEligible) {
-      await finalizeSold(
-        options.initialGame.guest_id,
-        hostFull ? GAME_DEFAULTS.MIN_BID_INCREMENT : basePrice,
-        hostFull ? "Attribué automatiquement" : "Seul enchérisseur restant",
-      )
+      await finalizeSold(options.initialGame.guest_id, 0, "Attribué automatiquement")
     }
-  }, [finalizeSold, finalizeUnsold, options?.initialGame.guest_id, options?.initialGame.host_id, teamSize])
+  }, [finalizeSold, finalizeUnsold, finishGame, options?.initialGame.guest_id, options?.initialGame.host_id, teamSize])
 
   useEffect(() => {
     if (state.phase !== "bidding") {
@@ -566,7 +569,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
         currentPlayer: next.player,
         currentBid: 0,
         currentBidder: null,
-        minimumBid: minimumBidForPlayer(next.player, 0),
+        minimumBid: minimumBidForPlayer(next.player, 0, false),
         timerEnd: next.timerEnd,
         timerSeconds: Math.max(0, Math.ceil((next.timerEnd - Date.now()) / 1000)),
         phase: "reveal",
@@ -586,7 +589,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
         ...current,
         currentBid: next.amount,
         currentBidder: next.bidderId,
-        minimumBid: minimumBidForPlayer(current.currentPlayer, next.amount),
+        minimumBid: minimumBidForPlayer(current.currentPlayer, next.amount, true),
         bidHistory: [
           ...current.bidHistory,
           {
@@ -652,8 +655,8 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
         phase: "sold",
         currentBid: next.amount,
         currentBidder: next.winnerId,
-        minimumBid: minimumBidForPlayer(current.currentPlayer, next.amount),
-        roundLabel: current.currentBidder === current.myId ? "Vous remportez l'enchère" : "Joueur vendu",
+        minimumBid: minimumBidForPlayer(current.currentPlayer, next.amount, true),
+        roundLabel: next.winnerId === current.myId ? "Vous remportez l'enchère" : "Joueur vendu",
         lastWinnerId: next.winnerId,
         lastSoldAmount: next.amount,
         myTeam:
@@ -677,7 +680,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
         phase: "unsold",
         currentBid: 0,
         currentBidder: null,
-        minimumBid: minimumBidForPlayer(current.currentPlayer, 0),
+        minimumBid: minimumBidForPlayer(current.currentPlayer, 0, false),
         roundLabel: next.round === current.currentRound ? "Joueur non vendu" : current.roundLabel,
         disconnectDeadline: null,
       }))
@@ -731,7 +734,7 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
       return
     }
 
-    if (state.currentBid > 0 && state.currentBidder) {
+    if (state.currentBidder) {
       void finalizeSold(state.currentBidder, state.currentBid)
       return
     }
@@ -800,11 +803,35 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
       return
     }
 
-    const bothPassed = state.passedBy.includes(hostId) && state.passedBy.includes(guestId) && state.currentBid === 0
-    if (bothPassed) {
-      void finalizeUnsold("Les deux joueurs passent")
+    const bothPassed = state.passedBy.includes(hostId) && state.passedBy.includes(guestId)
+
+    if (bothPassed && !state.currentBidder) {
+      void finalizeUnsold("Aucune enchère")
+      return
     }
-  }, [finalizeUnsold, options?.initialGame.guest_id, options?.initialGame.host_id, state.currentBid, state.passedBy, state.phase, state.isHost])
+
+    if (bothPassed && state.currentBidder) {
+      void finalizeSold(state.currentBidder, state.currentBid, "Adjugé !")
+      return
+    }
+
+    if (state.currentBidder) {
+      const nonBidder = state.currentBidder === hostId ? guestId : hostId
+      if (state.passedBy.includes(nonBidder)) {
+        void finalizeSold(state.currentBidder, state.currentBid, "Adjugé !")
+      }
+    }
+  }, [
+    finalizeSold,
+    finalizeUnsold,
+    options?.initialGame.guest_id,
+    options?.initialGame.host_id,
+    state.currentBid,
+    state.currentBidder,
+    state.passedBy,
+    state.phase,
+    state.isHost,
+  ])
 
   const canBid = useCallback(
     (amount: number) => {
@@ -825,11 +852,15 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
         return false
       }
 
-      if (amount < current.minimumBid) {
+      if (!current.currentBidder && amount < 0) {
         return false
       }
 
-      return canAffordAtAmount(amount, current.myBudget, teamSize, current.myTeam.length)
+      if (current.currentBidder && amount <= current.currentBid) {
+        return false
+      }
+
+      return canAffordAtAmount(amount, current.myBudget)
     },
     [teamSize],
   )
@@ -869,11 +900,6 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
       return
     }
 
-    if (current.currentBid > 0) {
-      toast.info("Tu peux laisser le timer expirer si tu ne veux pas surenchérir.")
-      return
-    }
-
     await broadcast("pass", {
       bidderId: current.myId,
       timestamp: Date.now(),
@@ -881,11 +907,17 @@ export function useAuction(gameId: string, userId: string, options?: UseAuctionO
   }, [broadcast])
 
   const quickBids = useMemo(() => {
-    const start = state.minimumBid
-    return [start, start + 1, start + 4, start + 9].filter(
-      (amount, index, values) => values.indexOf(amount) === index,
+    const base = state.currentBid
+    if (!state.currentBidder) {
+      return [0, 5, 10, 20].filter(
+        (amount, index, values) => values.indexOf(amount) === index && amount <= state.myBudget,
+      )
+    }
+
+    return [base + 1, base + 5, base + 10, base + 25].filter(
+      (amount, index, values) => values.indexOf(amount) === index && amount <= state.myBudget,
     )
-  }, [state.minimumBid])
+  }, [state.currentBid, state.currentBidder, state.myBudget])
 
   return {
     state,
