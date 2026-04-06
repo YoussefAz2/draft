@@ -57,10 +57,13 @@ export function BidControls({
           <p className="mt-2 text-sm text-muted-foreground">
             {state.currentBidder
               ? state.currentBidder === state.myId
-                ? "Vous êtes meilleur enchérisseur"
-                : `${state.opponentUsername} mène l'enchère`
-              : "Aucune enchère — commence à 0M€"}
+                ? "Tu mènes ! 🟢"
+                : `${state.opponentUsername} mène 🔴`
+              : "Aucune enchère"}
           </p>
+        </div>
+        <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+          Budget <span className="text-white">{state.myBudget}M€</span>
         </div>
       </div>
 
@@ -105,17 +108,14 @@ export function BidControls({
         </Button>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-muted-foreground">
-          Budget restant: <span className="font-semibold text-white">{state.myBudget}M€</span>
-        </div>
+      <div className="mt-4">
         <Button
           variant="ghost"
-          className="h-12 rounded-2xl border border-white/10 bg-black/25 text-sm font-semibold text-muted-foreground hover:bg-white/10 hover:text-white"
+          className="h-12 w-full rounded-2xl border-2 border-amber-400/30 bg-amber-400/10 text-sm font-semibold text-amber-300 hover:bg-amber-400/20 hover:text-amber-200"
           disabled={state.phase !== "bidding"}
           onClick={passTurn}
         >
-          Passer
+          ⏭️ Passer ce joueur
         </Button>
       </div>
     </div>

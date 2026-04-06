@@ -81,7 +81,7 @@ export function LobbyClient({
       }
 
       redirectingRef.current = true
-      toast.success("Adversaire trouvé. Redirection vers le salon...")
+      toast.success("Adversaire trouvé. Redirection vers la partie...")
       router.push(`/game/${gameId}`)
       router.refresh()
     },
@@ -94,10 +94,10 @@ export function LobbyClient({
     startCreateTransition(async () => {
       try {
         const result = await createPrivateGame(createConfig)
-        toast.success(`Salon privé créé. Code ${result.roomCode}`)
+        toast.success(`Partie privée créée. Code ${result.roomCode}`)
         router.push(`/game/${result.gameId}`)
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Impossible de créer le salon.")
+        toast.error(error instanceof Error ? error.message : "Impossible de créer la partie.")
       }
     })
   }
@@ -106,7 +106,7 @@ export function LobbyClient({
     const normalizedCode = normalizeCode(joinCode)
 
     if (normalizedCode.length !== ROOM_CODE_LENGTH) {
-      toast.error("Entre un code de salon valide sur 6 caractères.")
+      toast.error("Entre un code valide de 6 caractères.")
       return
     }
 
@@ -115,10 +115,10 @@ export function LobbyClient({
     startJoinTransition(async () => {
       try {
         const result = await joinGameByCode(normalizedCode)
-        toast.success("Salon rejoint.")
+        toast.success("Partie rejointe.")
         router.push(`/game/${result.gameId}`)
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Impossible de rejoindre le salon.")
+        toast.error(error instanceof Error ? error.message : "Impossible de rejoindre la partie.")
       }
     })
   }
@@ -143,7 +143,7 @@ export function LobbyClient({
 
         setQuickState({ phase: "searching", gameId: result.gameId })
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Impossible de lancer le matchmaking.")
+        toast.error(error instanceof Error ? error.message : "Impossible de lancer la recherche.")
         setQuickState({ phase: "idle" })
       }
     })
@@ -235,7 +235,7 @@ export function LobbyClient({
       }
 
       setQuickState({ phase: "timeout", gameId })
-      toast.error("Aucun adversaire trouvé. Réessaie ou crée un salon privé.")
+      toast.error("Aucun adversaire trouvé. Réessaie ou crée une partie privée.")
     }, 30000)
 
     return () => {
@@ -262,14 +262,14 @@ export function LobbyClient({
               Retour
             </Link>
             <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">
-              Matchmaking rapide
+              Match rapide
             </Badge>
             <div className="mt-4 flex size-20 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary shadow-[0_0_60px_rgba(34,197,94,0.2)]">
               <Loader2 className="size-10 animate-spin" />
             </div>
-            <CardTitle className="text-3xl text-white">Recherche d&apos;un adversaire...</CardTitle>
+            <CardTitle className="text-3xl text-white">Recherche en cours... ⏳</CardTitle>
             <CardDescription className="max-w-lg text-base">
-              Nous surveillons le lobby en temps réel via Supabase Realtime. Si aucun adversaire n&apos;arrive sous 30 secondes, la recherche sera arrêtée.
+              On te trouve un adversaire. Si personne n&apos;arrive vite, tu pourras relancer ou inviter un ami.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pb-8">
@@ -292,7 +292,7 @@ export function LobbyClient({
                   "h-12 flex-1 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10",
                 )}
               >
-                Créer un salon privé
+                Créer une partie privée
               </Link>
             </div>
           </CardContent>
@@ -320,18 +320,18 @@ export function LobbyClient({
                 Retour
               </Link>
               <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">
-                Lobby
+                Jouer
               </Badge>
               <div className="space-y-2">
-                <h1 className="text-4xl font-semibold text-white">Choisis ton entrée dans l&apos;arène</h1>
+                <h1 className="text-4xl font-semibold text-white">Choisis comment jouer</h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Matchmaking rapide, salon privé ou code d&apos;invitation. Toutes les transitions sont synchronisées en temps réel.
+                  Match rapide, partie privée ou code partagé par un ami.
                 </p>
               </div>
             </div>
             {showQuickTimeout ? (
               <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
-                Aucun adversaire trouvé. Tu peux relancer une recherche ou passer en salon privé.
+                Aucun adversaire trouvé. Tu peux relancer une recherche ou créer une partie privée.
               </div>
             ) : null}
           </div>
@@ -348,14 +348,12 @@ export function LobbyClient({
               <Badge className="w-fit rounded-full border border-primary/20 bg-primary/10 text-primary">
                 🎮 Match rapide
               </Badge>
-              <CardTitle className="text-2xl text-white">Trouve un adversaire aléatoire</CardTitle>
-              <CardDescription>
-                Une partie Star Players prête à lancer dès qu&apos;un autre coach rejoint la file.
-              </CardDescription>
+              <CardTitle className="text-2xl text-white">Trouve un adversaire</CardTitle>
+              <CardDescription>On te trouve un adversaire !</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4 text-sm text-muted-foreground">
-                Recherche instantanée, écoute Realtime et fallback polling toutes les 3 secondes.
+                Mode {GAME_MODES.star_players.icon} {GAME_MODES.star_players.label} · 250M€ · 5 joueurs
               </div>
               <Button
                 size="lg"
@@ -377,12 +375,10 @@ export function LobbyClient({
           >
             <CardHeader>
               <Badge className="w-fit rounded-full border border-amber-400/20 bg-amber-400/10 text-amber-300">
-                🔒 Créer un salon privé
+                🔒 Créer une partie privée
               </Badge>
-              <CardTitle className="text-2xl text-white">Configure la salle</CardTitle>
-              <CardDescription>
-                Défini les paramètres de draft puis partage le code à ton adversaire.
-              </CardDescription>
+              <CardTitle className="text-2xl text-white">Invite un ami</CardTitle>
+              <CardDescription>Choisis les réglages puis partage le code.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -400,10 +396,27 @@ export function LobbyClient({
                   {Object.entries(GAME_MODES).map(([mode, meta]) => (
                     <option key={mode} value={mode} disabled={mode !== ENABLED_MODE}>
                       {meta.icon} {meta.label}
-                      {mode !== ENABLED_MODE ? " · Bientôt disponible" : ""}
+                      {mode !== ENABLED_MODE ? " · Bientôt" : ""}
                     </option>
                   ))}
                 </NativeSelect>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {Object.entries(GAME_MODES)
+                    .filter(([mode]) => mode !== ENABLED_MODE)
+                    .map(([mode, meta]) => (
+                      <div
+                        key={mode}
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-xs text-muted-foreground"
+                      >
+                        <span>
+                          {meta.icon} {meta.label}
+                        </span>
+                        <Badge variant="secondary" className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px]">
+                          Bientôt
+                        </Badge>
+                      </div>
+                    ))}
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -427,7 +440,7 @@ export function LobbyClient({
                   </NativeSelect>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="team-size">Équipe</Label>
+                  <Label htmlFor="team-size">Joueurs par équipe</Label>
                   <NativeSelect
                     id="team-size"
                     value={createConfig.teamSize}
@@ -454,7 +467,7 @@ export function LobbyClient({
                 onClick={handleCreateGame}
               >
                 {createPending ? <Loader2 className="size-4 animate-spin" /> : <LockKeyhole className="size-4" />}
-                Créer le salon
+                Créer la partie
               </Button>
             </CardContent>
           </Card>
@@ -467,12 +480,10 @@ export function LobbyClient({
           >
             <CardHeader>
               <Badge variant="secondary" className="w-fit rounded-full border border-white/10 bg-white/5">
-                🔗 Rejoindre un salon
+                🔗 Rejoindre une partie
               </Badge>
               <CardTitle className="text-2xl text-white">Entre un code</CardTitle>
-              <CardDescription>
-                Utilise le code privé reçu pour rejoindre immédiatement la waiting room.
-              </CardDescription>
+              <CardDescription>Entre le code partagé par ton ami.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -493,10 +504,10 @@ export function LobbyClient({
                 onClick={handleJoinGame}
               >
                 {joinPending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus2 className="size-4" />}
-                Rejoindre
+                Rejoindre la partie
               </Button>
               <div className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4 text-sm text-muted-foreground">
-                Validation stricte sur 6 caractères et vérification du statut waiting côté serveur.
+                Le code te fait rejoindre la partie en quelques secondes.
               </div>
             </CardContent>
           </Card>
@@ -506,18 +517,18 @@ export function LobbyClient({
           {[
             {
               icon: Sword,
-              title: "Temps réel",
-              description: "Les salons et matchs rapides se synchronisent via Supabase Realtime.",
+              title: "Rapide",
+              description: "Tu trouves une partie ou tu en crées une en quelques secondes.",
             },
             {
               icon: Users,
-              title: "Ready check",
-              description: "Chaque joueur partage son statut ready en présence temps réel avant le lancement.",
+              title: "Entre amis",
+              description: "Crée une partie privée et partage le code à ton ami.",
             },
             {
               icon: Search,
-              title: "Fallback robuste",
-              description: "Le matchmaking rapide continue de sonder la DB toutes les 3 secondes si besoin.",
+              title: "Simple",
+              description: "Choisis ton budget, ton équipe et lance-toi.",
             },
           ].map((item) => {
             const Icon = item.icon

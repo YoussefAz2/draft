@@ -31,7 +31,7 @@ export default function Error({
               "rounded-2xl border-white/10 bg-white/5 hover:bg-white/10",
             )}
           >
-            Dashboard
+            Accueil
           </Link>
         </div>
       </div>

@@ -48,7 +48,8 @@ export function TeamPanel({
                 key={`empty-${index}`}
                 className="flex min-h-24 items-center justify-center rounded-[1.25rem] border border-dashed border-white/10 bg-black/20 px-4 py-3 text-sm text-muted-foreground"
               >
-                Slot {index + 1}
+                <span className="mr-2 text-2xl opacity-40">👤</span>
+                <span>Poste {index + 1}</span>
               </div>
             )
           }

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useMemo, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, RefreshCcw, Sparkles, Swords, Trophy } from "lucide-react"
+import { Home, RefreshCcw, Sparkles, Trophy } from "lucide-react"
 import { toast } from "sonner"
 
 import { createRematch } from "@/app/game/actions"
@@ -18,7 +18,7 @@ function getOutcomeMessage(currentUserId: string, winnerId: string | null) {
   if (!winnerId) {
     return {
       title: "🤝 Égalité",
-      subtitle: "Match nul · 0 ELO",
+      subtitle: "Match nul · 0 classement",
       tone: "border-slate-400/20 bg-slate-400/10 text-slate-100",
     }
   }
@@ -26,14 +26,14 @@ function getOutcomeMessage(currentUserId: string, winnerId: string | null) {
   if (winnerId === currentUserId) {
     return {
       title: "🎉 Victoire !",
-      subtitle: "+25 ELO",
+      subtitle: "+25 classement",
       tone: "border-emerald-400/20 bg-emerald-400/10 text-emerald-100",
     }
   }
 
   return {
     title: "😔 Défaite",
-    subtitle: "-25 ELO",
+    subtitle: "-25 classement",
     tone: "border-rose-400/20 bg-rose-400/10 text-rose-100",
   }
 }
@@ -75,17 +75,9 @@ export function ResultsView({
         ? game.guest_id
         : null
   const outcome = getOutcomeMessage(currentUserId, winnerId)
-
-  const chemistrySections = [
-    {
-      title: hostProfile?.username ?? "Host",
-      links: hostScore.breakdown.chemistryLinks,
-    },
-    {
-      title: guestProfile?.username ?? "Guest",
-      links: guestScore.breakdown.chemistryLinks,
-    },
-  ].filter((section) => section.links.length > 0)
+  const isCurrentUserHost = game.host_id === currentUserId
+  const myScore = isCurrentUserHost ? hostScore.totalScore : guestScore.totalScore
+  const opponentScore = isCurrentUserHost ? guestScore.totalScore : hostScore.totalScore
 
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
@@ -106,9 +98,7 @@ export function ResultsView({
             <h1 className="text-4xl font-black tracking-[0.08em]">RÉSULTATS</h1>
             <Trophy className="size-8 text-amber-300" />
           </div>
-          <p className="mt-3 text-base text-muted-foreground">
-            Draft terminé · comparaison automatique des effectifs, de la chimie et du budget.
-          </p>
+          <p className="mt-3 text-base text-muted-foreground">La partie est terminée !</p>
         </motion.section>
 
         <section className="grid gap-6 xl:grid-cols-2">
@@ -146,50 +136,9 @@ export function ResultsView({
             <Sparkles className="size-5" />
           </div>
           <p className="mt-2 text-sm font-semibold uppercase tracking-[0.28em]">{outcome.subtitle}</p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-current/90">
-            <div className="rounded-full border border-current/15 px-4 py-2">
-              {hostProfile?.username ?? "Host"} {hostScore.totalScore.toFixed(1)}
-            </div>
-            <Swords className="size-4" />
-            <div className="rounded-full border border-current/15 px-4 py-2">
-              {guestProfile?.username ?? "Guest"} {guestScore.totalScore.toFixed(1)}
-            </div>
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.65, duration: 0.4 }}
-          className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
-        >
-          <div className="flex items-center gap-3">
-            <Sparkles className="size-5 text-primary" />
-            <p className="text-lg font-semibold text-white">Liens de chimie</p>
-          </div>
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {chemistrySections.length ? (
-              chemistrySections.map((section) => (
-                <div key={section.title} className="rounded-[1.5rem] border border-white/10 bg-black/25 p-4">
-                  <p className="text-sm font-semibold text-white">{section.title}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {section.links.map((link) => (
-                      <span
-                        key={`${section.title}-${link}`}
-                        className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-sm text-primary"
-                      >
-                        {link} 🔗
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-black/20 px-4 py-8 text-center text-sm text-muted-foreground lg:col-span-2">
-                Aucune synergie forte détectée sur cette partie.
-              </div>
-            )}
-          </div>
+          <p className="mt-5 text-base font-medium text-current/90">
+            Toi: {myScore.toFixed(1)} pts vs Adversaire: {opponentScore.toFixed(1)} pts
+          </p>
         </motion.section>
 
         <motion.section
@@ -218,9 +167,9 @@ export function ResultsView({
             <RefreshCcw className={cn("size-4", isRematchPending && "animate-spin")} />
             Rejouer
           </Button>
-          <Link href="/dashboard" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-2xl px-5")}> 
+          <Link href="/dashboard" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-2xl px-5")}>
             <Home className="size-4" />
-            Dashboard
+            Accueil
           </Link>
         </motion.section>
       </div>

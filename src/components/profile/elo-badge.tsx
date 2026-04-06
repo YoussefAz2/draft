@@ -11,9 +11,9 @@ const tierStyles = {
 
 const tierLabels = {
   bronze: "Bronze",
-  silver: "Silver",
-  gold: "Gold",
-  diamond: "Diamond",
+  silver: "Argent",
+  gold: "Or",
+  diamond: "Diamant",
 } satisfies Record<ReturnType<typeof getEloTier>, string>
 
 export function EloBadge({ eloRating, className }: { eloRating: number; className?: string }) {
@@ -21,7 +21,7 @@ export function EloBadge({ eloRating, className }: { eloRating: number; classNam
 
   return (
     <Badge className={cn("rounded-full border px-3 py-1 text-sm font-semibold", tierStyles[tier], className)}>
-      {tierLabels[tier]} · {eloRating} ELO
+      {tierLabels[tier]} · {eloRating} pts
     </Badge>
   )
 }

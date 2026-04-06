@@ -25,11 +25,11 @@ export const metadata: Metadata = {
     template: "%s | Football Auction Draft",
   },
   description:
-    "Draft football 1v1 avec enchères live, lobby privé, classement et dashboard Supabase.",
+    "Jeu de foot en 1 contre 1 avec enchères, parties privées et classement.",
   openGraph: {
     title: "Football Auction Draft",
     description:
-      "Construis ton équipe de rêve via des enchères en temps réel.",
+      "Monte ton équipe de rêve et bats ton adversaire.",
     siteName: "Football Auction Draft",
     type: "website",
     locale: "fr_FR",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Football Auction Draft",
     description:
-      "Construis ton équipe de rêve via des enchères en temps réel.",
+      "Monte ton équipe de rêve et bats ton adversaire.",
   },
 }
 

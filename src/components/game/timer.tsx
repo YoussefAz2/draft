@@ -46,8 +46,8 @@ export function AuctionTimer({
         </div>
       </motion.div>
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Timer</p>
-        <p className={cn("text-lg font-semibold", tone)}>{label ?? (seconds < 3 ? "Clôture imminente" : "Enchères ouvertes")}</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">⏱️ Temps</p>
+        <p className={cn("text-lg font-semibold", tone)}>{label ?? (seconds < 3 ? "Dernières secondes !" : "En cours...")}</p>
       </div>
     </div>
   )

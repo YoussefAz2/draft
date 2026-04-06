@@ -79,7 +79,7 @@ export function TeamSummary({
 
       <div className="mt-5 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
         <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-          Note moyenne: <span className="font-semibold text-white">{score.breakdown.avgRating.toFixed(1)}</span>
+          Moyenne : <span className="font-semibold text-white">{score.breakdown.avgRating.toFixed(1)}</span>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">{score.breakdown.positionCoverage}</div>
       </div>
@@ -91,8 +91,8 @@ export function TeamSummary({
 
       <div className="mt-5 space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Effectif acheté</p>
-          <p className="text-sm text-muted-foreground">Budget: {budgetRemaining}M€</p>
+          <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Mon équipe</p>
+          <p className="text-sm text-muted-foreground">Restant : {budgetRemaining}M€</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {players.length ? (

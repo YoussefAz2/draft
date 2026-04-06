@@ -37,7 +37,7 @@ export default async function LobbyPage({
             </Badge>
             <CardTitle className="text-3xl text-white">Configuration manquante</CardTitle>
             <CardDescription className="text-base text-muted-foreground">
-              Ajoute les variables Supabase pour activer le matchmaking en temps réel.
+              Ajoute les variables Supabase pour activer la recherche d&apos;adversaire.
             </CardDescription>
           </CardHeader>
         </Card>

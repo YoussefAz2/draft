@@ -1,6 +1,6 @@
 "use client"
 
-import { Crown, Gavel, ShieldAlert } from "lucide-react"
+import { ShieldAlert } from "lucide-react"
 import { motion } from "framer-motion"
 
 import { BidControls } from "@/components/game/bid-controls"
@@ -88,7 +88,7 @@ export function AuctionView({
         <div className="xl:order-1">
           <TeamPanel
             title="Mon équipe"
-            subtitle="Tes recrues"
+            subtitle="Mes joueurs"
             budget={state.myBudget}
             players={state.myTeam}
             teamSize={initialGame.team_size}
@@ -101,45 +101,45 @@ export function AuctionView({
             <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge className="rounded-full border border-white/10 bg-black/30 text-white">
-                  Round {state.currentRound}/{state.totalRounds}
+                  Joueur {state.currentRound}/{state.totalRounds}
                 </Badge>
                 <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">
                   {state.phase === "reveal"
-                    ? "Révélation"
+                    ? "🎭 Nouveau joueur"
                     : state.phase === "bidding"
-                      ? "Enchères"
+                      ? "🔨 Enchères ouvertes"
                       : state.phase === "sold"
-                        ? "Vendu"
-                        : "Passé"}
+                        ? "✅ Vendu !"
+                        : "⏭️ Passé"}
                 </Badge>
                 {isMyTurn ? (
                   <Badge className="rounded-full border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
-                    <Crown className="mr-1 size-3.5" />
-                    Tu peux enchérir
+                    🟢 À toi !
                   </Badge>
                 ) : null}
                 {!state.connectedUserIds.includes(state.opponentId) ? (
                   <Badge className="rounded-full border border-amber-400/20 bg-amber-400/10 text-amber-300">
                     <ShieldAlert className="mr-1 size-3.5" />
-                    Adversaire hors ligne
+                    ⚠️ Adversaire déconnecté
                   </Badge>
                 ) : null}
               </div>
 
-              <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                <span>{state.roundLabel ?? "Le plus offrant remporte le joueur."}</span>
-                {state.disconnectDeadline ? (
-                  <span>
-                    Auto-pass dans {Math.max(0, Math.ceil((state.disconnectDeadline - Date.now()) / 1000))}s
-                  </span>
-                ) : null}
-              </div>
+              {state.roundLabel ? <div className="mt-4 text-sm text-muted-foreground">{state.roundLabel}</div> : null}
             </div>
 
             <AuctionTimer
               seconds={state.timerSeconds}
               totalSeconds={timerTotalSeconds}
-              label={state.phase === "reveal" ? "Révélation" : state.phase === "bidding" ? "Clôture du round" : state.roundLabel ?? undefined}
+              label={
+                state.phase === "reveal"
+                  ? "🎭 Nouveau joueur"
+                  : state.phase === "sold"
+                    ? "✅ Vendu !"
+                    : state.phase === "unsold"
+                      ? "⏭️ Passé"
+                      : undefined
+              }
             />
           </div>
 
@@ -162,27 +162,6 @@ export function AuctionView({
               passTurn={passTurn}
             />
             <BidHistory history={state.bidHistory} myId={state.myId} />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-4">
-              <div className="flex items-center gap-3">
-                <Gavel className="size-5 text-primary" />
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Mon budget</p>
-                  <p className="text-2xl font-black text-white">{state.myBudget}M€</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-4">
-              <div className="flex items-center gap-3">
-                <Gavel className="size-5 text-amber-300" />
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Budget adverse</p>
-                  <p className="text-2xl font-black text-white">{state.opponentBudget}M€</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 

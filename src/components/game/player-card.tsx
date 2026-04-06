@@ -74,8 +74,8 @@ export function PlayerCard({
             <div className="flex size-28 items-center justify-center rounded-full border border-white/10 bg-white/5 text-6xl font-black text-white/80">
               ?
             </div>
-            <p className="mt-6 text-xl font-semibold text-white">Révélation du joueur</p>
-            <p className="mt-2 text-center text-sm text-muted-foreground">La prochaine star apparaît dans quelques instants.</p>
+            <p className="mt-6 text-xl font-semibold text-white">Prochain joueur...</p>
+            <p className="mt-2 text-center text-sm text-muted-foreground">Qui sera-ce ?</p>
           </div>
         </div>
 
@@ -91,10 +91,6 @@ export function PlayerCard({
               <div>
                 <p className="text-5xl font-black leading-none">{player.overall_rating}</p>
                 <p className="mt-1 text-sm font-semibold uppercase tracking-[0.3em]">{player.position}</p>
-              </div>
-              <div className="rounded-2xl border border-black/10 bg-black/10 px-3 py-2 text-right">
-                <p className="text-[10px] uppercase tracking-[0.24em] opacity-70">Base</p>
-                <p className="text-xl font-bold">{player.base_price}M€</p>
               </div>
             </div>
 

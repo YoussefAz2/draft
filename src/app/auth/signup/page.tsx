@@ -228,7 +228,7 @@ export default function SignupPage() {
             <div className="space-y-2">
               <CardTitle className="text-3xl text-white">Créer un compte</CardTitle>
               <CardDescription className="text-base leading-7 text-muted-foreground">
-                Réserve ton pseudo, active ton profil Supabase et entre dans le dashboard.
+                Choisis ton pseudo et prépare-toi pour ta première partie.
               </CardDescription>
             </div>
           </CardHeader>
@@ -306,21 +306,21 @@ export default function SignupPage() {
                 Se connecter
               </Link>
             </p>
-            <p>Le trigger Supabase crée automatiquement ton profil `profiles` à l’inscription.</p>
+            <p>Ton profil est prêt automatiquement dès ton inscription.</p>
           </CardFooter>
         </Card>
 
         <div className="order-1 flex flex-col justify-between rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-xl lg:order-2">
           <div className="space-y-5">
             <Badge className="w-fit rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-1 text-amber-300">
-              New contender
+              Nouveau joueur
             </Badge>
             <div className="space-y-4">
               <h1 className="text-4xl font-semibold text-white">
                 Entre dans le jeu avec un profil prêt pour le duel.
               </h1>
               <p className="text-lg leading-8 text-muted-foreground">
-                Un pseudo unique, des statistiques centralisées et un accès direct aux salons publics ou privés.
+                Un pseudo unique, ton classement et un accès direct aux parties rapides ou privées.
               </p>
             </div>
           </div>
@@ -333,13 +333,13 @@ export default function SignupPage() {
               },
               {
                 icon: Target,
-                title: "Dashboard instantané",
-                description: "Stats, winrate et dernières parties dès la première connexion.",
+                title: "Accueil immédiat",
+                description: "Retrouve tes parties et tes résultats dès la première connexion.",
               },
               {
                 icon: Shield,
-                title: "Supabase sécurisé",
-                description: "Session persistante et profil rechargé en temps réel.",
+                title: "Compte sécurisé",
+                description: "Ta session et ton profil restent bien enregistrés.",
               },
             ].map(({ icon: FeatureIcon, title, description }) => (
               <div key={title} className="rounded-2xl border border-white/10 bg-black/25 p-5">
