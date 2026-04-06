@@ -40,8 +40,8 @@ export interface GameConfig {
 export const GAME_DEFAULTS = {
   BUDGET: 250,
   TEAM_SIZE: 5,
-  BID_TIMER_SECONDS: 10,
-  BID_TIMER_RESET_SECONDS: 5,
+  BID_TIMER_SECONDS: 15,
+  BID_TIMER_RESET_SECONDS: 8,
   MIN_BID_INCREMENT: 1,
 } as const;
 

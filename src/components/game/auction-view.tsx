@@ -32,7 +32,7 @@ export function AuctionView({
     profiles,
   })
 
-  const timerTotalSeconds = state.currentBid > 0 ? GAME_DEFAULTS.BID_TIMER_RESET_SECONDS : GAME_DEFAULTS.BID_TIMER_SECONDS
+  const timerTotalSeconds = state.currentBidder ? GAME_DEFAULTS.BID_TIMER_RESET_SECONDS : GAME_DEFAULTS.BID_TIMER_SECONDS
   const overlay =
     state.phase === "sold" && state.currentPlayer ? (
       <div className="flex h-full items-center justify-center">

@@ -26,6 +26,17 @@ export function BidControls({
     const parsed = Number(customBid)
     return Number.isFinite(parsed) && canBid(parsed)
   }, [canBid, customBid])
+  const quickBidLabel = (amount: number) => {
+    if (!state.currentBidder) {
+      if (amount === 0) {
+        return "Gratuit"
+      }
+
+      return `${amount}M€`
+    }
+
+    return `${amount}M€ (+${amount - state.currentBid})`
+  }
 
   return (
     <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
@@ -48,12 +59,8 @@ export function BidControls({
               ? state.currentBidder === state.myId
                 ? "Vous êtes meilleur enchérisseur"
                 : `${state.opponentUsername} mène l'enchère`
-              : `Ouverture à ${state.minimumBid}M€`}
+              : "Aucune enchère — commence à 0M€"}
           </p>
-        </div>
-        <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-right">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Minimum</p>
-          <p className="text-2xl font-bold text-white">{state.minimumBid}M€</p>
         </div>
       </div>
 
@@ -66,7 +73,7 @@ export function BidControls({
             disabled={!canBid(amount)}
             onClick={() => placeBid(amount)}
           >
-            {amount}M€
+            {quickBidLabel(amount)}
           </Button>
         ))}
       </div>
@@ -79,7 +86,7 @@ export function BidControls({
           value={customBid}
           onChange={(event) => setCustomBid(event.target.value)}
           className="h-12 rounded-2xl px-4 text-base"
-          placeholder={`Au moins ${state.minimumBid}M€`}
+          placeholder={!state.currentBidder ? "0M€ ou plus" : `Plus de ${state.currentBid}M€`}
         />
         <Button
           size="lg"
@@ -105,7 +112,7 @@ export function BidControls({
         <Button
           variant="ghost"
           className="h-12 rounded-2xl border border-white/10 bg-black/25 text-sm font-semibold text-muted-foreground hover:bg-white/10 hover:text-white"
-          disabled={state.phase !== "bidding" || state.currentBid > 0}
+          disabled={state.phase !== "bidding"}
           onClick={passTurn}
         >
           Passer
