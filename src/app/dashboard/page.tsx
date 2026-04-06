@@ -40,13 +40,6 @@ function getOpponentName(userId: string, game: RecentGame) {
   return userId === game.host_id ? game.guest?.username ?? "Adversaire" : game.host?.username ?? "Adversaire"
 }
 
-function getScoreLabel(userId: string, game: RecentGame) {
-  const myScore = userId === game.host_id ? game.host_score ?? 0 : game.guest_score ?? 0
-  const opponentScore = userId === game.host_id ? game.guest_score ?? 0 : game.host_score ?? 0
-
-  return `${myScore.toFixed(1)} - ${opponentScore.toFixed(1)}`
-}
-
 function getTeamPreview(userId: string, game: RecentGame) {
   const names = game.game_players
     .filter((entry) => entry.won_by === userId)
@@ -144,23 +137,20 @@ export default async function DashboardPage() {
   const winRate = formatWinRate(wins, totalGames)
 
   const stats = [
-    { label: "Parties jouées", value: totalGames, icon: Target },
+    { label: "Parties", value: totalGames, icon: Target },
     { label: "Victoires", value: wins, icon: Trophy },
-    { label: "Winrate", value: winRate, icon: Swords },
-    { label: "ELO", value: eloRating, icon: Crown },
+    { label: "Taux de victoire", value: winRate, icon: Swords },
+    { label: "Classement", value: eloRating, icon: Crown },
   ]
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="space-y-8">
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-          <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">Dashboard</Badge>
-          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <h1 className="text-4xl font-semibold text-white">Bienvenue, {username}!</h1>
-              <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                Prépare ta prochaine enchère, surveille tes résultats et consulte ton historique compétitif.
-              </p>
+              <p className="max-w-2xl text-base leading-7 text-muted-foreground">Prêt pour ta prochaine partie ?</p>
             </div>
             <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
               <EloBadge eloRating={eloRating} />
@@ -189,7 +179,6 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <CardTitle className="text-3xl text-white">{stat.value}</CardTitle>
-                  {stat.label === "ELO" ? <EloBadge eloRating={eloRating} className="mt-2 w-fit" /> : null}
                 </CardHeader>
               </Card>
             )
@@ -200,7 +189,7 @@ export default async function DashboardPage() {
           <Card className="border-white/10 bg-white/5 backdrop-blur-xl">
             <CardHeader>
               <CardTitle className="text-2xl text-white">Jouer une partie</CardTitle>
-              <CardDescription>Choisis ton format de matchmaking et lance une nouvelle enchère.</CardDescription>
+              <CardDescription>Lance-toi !</CardDescription>
             </CardHeader>
             <CardContent>
               <DashboardActions />
@@ -209,7 +198,7 @@ export default async function DashboardPage() {
 
           <Card className="border-white/10 bg-white/5 backdrop-blur-xl">
             <CardHeader>
-              <CardTitle className="text-2xl text-white">Dernières parties</CardTitle>
+              <CardTitle className="text-2xl text-white">📜 Historique</CardTitle>
               <CardDescription>
                 {gamesError ? "Impossible de charger l'historique pour le moment." : "Tes 10 dernières parties terminées."}
               </CardDescription>
@@ -227,7 +216,6 @@ export default async function DashboardPage() {
                       resultTone={result.tone}
                       opponentName={getOpponentName(user.id, game)}
                       timestampLabel={formatRelativeTime(game.created_at)}
-                      scoreLabel={getScoreLabel(user.id, game)}
                       modeLabel={GAME_MODES[game.mode].label}
                       modeIcon={GAME_MODES[game.mode].icon}
                       teamPreview={getTeamPreview(user.id, game)}

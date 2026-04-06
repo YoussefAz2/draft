@@ -8,7 +8,6 @@ import { toast } from "sonner"
 
 import { useAuth } from "@/components/providers/auth-provider"
 import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -25,7 +24,6 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { href: "/", label: "Accueil" },
   { href: "/lobby", label: "Jouer" },
-  { href: "/#features", label: "Classement" },
 ]
 
 function getInitials(value?: string | null) {
@@ -72,13 +70,13 @@ function AuthControls({ mobile = false }: { mobile?: boolean }) {
           href="/auth/login"
           className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "justify-center")}
         >
-          Login
+          Connexion
         </Link>
         <Link
           href="/auth/signup"
           className={cn(buttonVariants({ size: "lg" }), "justify-center shadow-[0_0_30px_rgba(34,197,94,0.25)]")}
         >
-          Signup
+          Inscription
         </Link>
       </div>
     )
@@ -174,7 +172,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => {
-            const isActive = item.href === "/" ? activePath === "/" : activePath.startsWith(item.href.replace("/#features", ""))
+            const isActive = item.href === "/" ? activePath === "/" : activePath.startsWith(item.href)
 
             return (
               <Link
@@ -223,9 +221,6 @@ export function Navbar() {
             </div>
             <Separator className="bg-white/10" />
             <AuthControls mobile />
-            <Badge variant="secondary" className="w-fit rounded-full border border-primary/20 bg-primary/10 text-primary">
-              Live auction · 1v1 · stratégie
-            </Badge>
           </div>
         </div>
       )}

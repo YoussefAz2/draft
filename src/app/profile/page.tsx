@@ -38,13 +38,6 @@ function getOpponentName(userId: string, game: HistoryGame) {
   return userId === game.host_id ? game.guest?.username ?? "Adversaire" : game.host?.username ?? "Adversaire"
 }
 
-function getScoreLabel(userId: string, game: HistoryGame) {
-  const myScore = userId === game.host_id ? game.host_score ?? 0 : game.guest_score ?? 0
-  const opponentScore = userId === game.host_id ? game.guest_score ?? 0 : game.host_score ?? 0
-
-  return `${myScore.toFixed(1)} - ${opponentScore.toFixed(1)}`
-}
-
 function getTeamPreview(userId: string, game: HistoryGame) {
   const names = game.game_players
     .filter((entry) => entry.won_by === userId)
@@ -244,7 +237,6 @@ export default async function ProfilePage() {
                     resultTone={result.tone}
                     opponentName={getOpponentName(user.id, game)}
                     timestampLabel={formatRelativeTime(game.created_at)}
-                    scoreLabel={getScoreLabel(user.id, game)}
                     modeLabel={GAME_MODES[game.mode].label}
                     modeIcon={GAME_MODES[game.mode].icon}
                     teamPreview={getTeamPreview(user.id, game)}

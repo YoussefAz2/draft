@@ -53,7 +53,7 @@ export function DashboardActions() {
         )}
       >
         <LockKeyhole className="size-4" />
-        Créer Salon Privé
+        Créer une partie privée
       </Link>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger
@@ -63,17 +63,15 @@ export function DashboardActions() {
           )}
         >
           <DoorOpen className="size-4" />
-          Rejoindre avec Code
+          Rejoindre une partie
         </DialogTrigger>
         <DialogContent className="rounded-[1.75rem] border border-white/10 bg-zinc-950/95 p-6 backdrop-blur-xl">
           <DialogHeader>
-            <DialogTitle>Rejoindre une salle privée</DialogTitle>
-            <DialogDescription>
-              Entre le code reçu pour rejoindre directement le lobby.
-            </DialogDescription>
+            <DialogTitle>Rejoindre une partie</DialogTitle>
+            <DialogDescription>Entre le code partagé par ton ami</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="room-code">Code du salon</Label>
+            <Label htmlFor="room-code">Code de la partie</Label>
             <Input
               id="room-code"
               value={code}

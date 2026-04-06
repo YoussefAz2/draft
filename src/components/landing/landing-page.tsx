@@ -30,22 +30,22 @@ import { cn } from "@/lib/utils"
 const steps = [
   {
     title: "Rejoins une partie",
-    description: "Entre dans l’arène en quelques secondes avec un code ou un match rapide.",
+    description: "Lance un match rapide ou invite un ami avec un code.",
     icon: Users,
   },
   {
     title: "Enchéris sur les joueurs",
-    description: "Lis le rythme de ton adversaire et pose l'offre au bon moment.",
+    description: "Mise au bon moment pour garder les meilleurs joueurs.",
     icon: CircleDollarSign,
   },
   {
     title: "Construis ton équipe",
-    description: "Compose un onze cohérent avec budget, rôles et synergies.",
+    description: "Compose une équipe solide avec ton budget.",
     icon: Shield,
   },
   {
     title: "Remporte la partie",
-    description: "Accumule les victoires, grimpe au classement et impose ton style.",
+    description: "Gagne, progresse et montre qui connaît le mieux le foot.",
     icon: Trophy,
   },
 ]
@@ -60,10 +60,10 @@ const modes = [
 ]
 
 const features = [
-  { title: "Temps réel", icon: Bolt },
-  { title: "Stratégie", icon: Swords },
+  { title: "Simple à lancer", icon: Bolt },
+  { title: "Fun à jouer", icon: Swords },
   { title: "Classement", icon: Crown },
-  { title: "1v1", icon: Sparkles },
+  { title: "Duel 1v1", icon: Sparkles },
 ]
 
 export function LandingPage({ ctaHref }: { ctaHref: string }) {
@@ -79,18 +79,17 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
         >
           <div className="space-y-8">
             <Badge className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-sm text-primary">
-              Gaming vibes · enchères live · football compétitif
+              Foot, enchères et duel entre amis
             </Badge>
             <div className="space-y-5">
               <p className="text-sm font-semibold uppercase tracking-[0.4em] text-primary/90">
                 🏆 Football Auction Draft
               </p>
               <h1 className="max-w-4xl text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
-                Construis ton équipe de rêve via des enchères en temps réel.
+                Monte ton équipe de rêve et bats ton adversaire.
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                Un draft sombre, nerveux et stratégique pour défier un adversaire,
-                sécuriser les meilleurs talents et gagner chaque duel d’enchères.
+                Choisis bien tes joueurs, gère ton budget et vis une partie rapide, simple et intense.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -122,18 +121,18 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
                 Star Players
               </Badge>
               <CardTitle className="text-2xl text-white sm:text-3xl">
-                La salle d’enchères s’allume.
+                Le duel peut commencer.
               </CardTitle>
               <CardDescription className="text-base leading-7 text-muted-foreground">
-                Défends ton budget, contrôle le tempo et vole le dernier mot au buzzer.
+                Garde ton budget, vise les bons joueurs et prends l’avantage au bon moment.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
               {[
-                ["Live auctions", "2 joueurs"],
-                ["Budget maîtrisé", "Décisions rapides"],
-                ["Drafts privés", "Room code"],
-                ["ELO tracking", "Progression"],
+                ["Face-à-face", "2 joueurs"],
+                ["Budget", "Décisions rapides"],
+                ["Partie privée", "Code à partager"],
+                ["Classement", "Progression"],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-2xl border border-white/10 bg-black/30 p-4">
                   <p className="text-sm text-muted-foreground">{label}</p>
@@ -142,8 +141,8 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
               ))}
             </CardContent>
             <CardFooter className="justify-between border-t border-white/10 bg-white/5 text-sm text-muted-foreground">
-              <span>Football strategy meets gaming intensity</span>
-              <span className="text-primary">Ready</span>
+              <span>Prêt pour ta prochaine partie ?</span>
+              <span className="text-primary">On joue</span>
             </CardFooter>
           </Card>
         </motion.div>
@@ -162,7 +161,7 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
               Comment ça marche
             </Badge>
             <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-              Quatre étapes pour dominer le draft.
+              Quatre étapes pour te lancer.
             </h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -200,7 +199,7 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
               Modes de jeu
             </Badge>
             <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-              Six façons de rentrer sur le terrain.
+              Plusieurs façons de jouer.
             </h2>
           </div>
           <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -227,10 +226,10 @@ export function LandingPage({ ctaHref }: { ctaHref: string }) {
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-3">
               <Badge variant="secondary" className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-sm">
-                Features
+                Pourquoi c&apos;est fun
               </Badge>
               <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-                Une interface conçue pour le duel.
+                Une interface pensée pour jouer vite.
               </h2>
             </div>
             <Separator className="hidden h-px w-32 bg-white/10 sm:block" />

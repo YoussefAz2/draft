@@ -105,7 +105,7 @@ function PlayerPanel({
         <div className="space-y-1">
           <p className="text-lg font-semibold text-white">{profile?.username ?? "En attente"}</p>
           <p className="text-sm text-muted-foreground">
-            {profile ? `ELO ${profile.elo_rating ?? 1000}` : pending ? "Recherche du joueur..." : "Aucun joueur connecté"}
+            {profile ? `Classement : ${profile.elo_rating ?? 1000}` : pending ? "En attente d'un adversaire..." : "Aucun joueur connecté"}
           </p>
         </div>
       </div>
@@ -201,7 +201,7 @@ export function WaitingRoomClient({
           void syncProfiles()
 
           if (nextGame.status === "cancelled") {
-            toast.error("Le salon a été annulé.")
+            toast.error("La partie a été annulée.")
           }
 
           if (nextGame.status === "in_progress") {
@@ -265,7 +265,7 @@ export function WaitingRoomClient({
 
   const handleToggleReady = () => {
     if (!bothPlayersJoined && currentUserRole === "host") {
-      toast.info("Attends qu'un adversaire rejoigne le salon.")
+      toast.info("Attends qu'un adversaire rejoigne la partie.")
       return
     }
 
@@ -274,7 +274,7 @@ export function WaitingRoomClient({
         try {
           await setPlayerReady(game.id)
           setIsReady(true)
-          toast.success("Tu es marqué comme prêt.")
+          toast.success("Tu es prêt.")
         } catch (error) {
           toast.error(error instanceof Error ? error.message : "Impossible de te marquer prêt.")
         }
@@ -284,14 +284,14 @@ export function WaitingRoomClient({
     }
 
     setIsReady(false)
-    toast.info("Statut ready retiré.")
+    toast.info("Tu n'es plus prêt.")
   }
 
   const handleLaunchGame = () => {
     startLaunchTransition(async () => {
       try {
         await initializeGame(game.id)
-        toast.success("Partie initialisée.")
+        toast.success("Partie lancée.")
         router.refresh()
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Impossible de lancer la partie.")
@@ -303,10 +303,10 @@ export function WaitingRoomClient({
     startLeaveTransition(async () => {
       try {
         await leaveGame(game.id)
-        toast.success(currentUserRole === "host" ? "Salon annulé." : "Tu as quitté le salon.")
+        toast.success(currentUserRole === "host" ? "Partie annulée." : "Tu as quitté la partie.")
         router.push("/lobby")
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Impossible de quitter le salon.")
+        toast.error(error instanceof Error ? error.message : "Impossible de quitter la partie.")
       }
     })
   }
@@ -330,11 +330,11 @@ export function WaitingRoomClient({
         <Card className="w-full border-white/10 bg-white/5 backdrop-blur-xl">
           <CardHeader>
             <Badge variant="destructive" className="w-fit rounded-full">
-              Salon annulé
+              Partie annulée
             </Badge>
             <CardTitle className="text-3xl text-white">Cette partie n&apos;est plus disponible</CardTitle>
             <CardDescription>
-              Un des joueurs a quitté le lobby avant le lancement. Retourne au lobby pour recréer un match.
+              Un des joueurs a quitté avant le lancement. Retourne jouer pour recréer une partie.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 sm:flex-row">
@@ -348,7 +348,7 @@ export function WaitingRoomClient({
                 "h-12 flex-1 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10",
               )}
             >
-              Dashboard
+              Accueil
             </Link>
           </CardContent>
         </Card>
@@ -366,19 +366,19 @@ export function WaitingRoomClient({
             </Badge>
             <CardTitle className="text-3xl text-white">{GAME_MODES[game.mode].icon} {GAME_MODES[game.mode].label}</CardTitle>
             <CardDescription>
-              Draft initialisé avec {game.total_rounds ?? game.team_size * 2} rounds et budgets à {game.budget}M€.
+              {game.total_rounds ?? game.team_size * 2} joueurs à dévoiler · budget {game.budget}M€
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-muted-foreground">
             <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-5">
-              La waiting room a validé les deux joueurs. La suite de l&apos;interface d&apos;enchères peut désormais consommer l&apos;état live du jeu sur cette route.
+              Les deux joueurs sont prêts. La partie peut commencer.
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link href="/lobby" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 flex-1 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10")}>
                 Nouveau lobby
               </Link>
               <Link href="/dashboard" className={cn(buttonVariants({ size: "lg" }), "h-12 flex-1 rounded-2xl")}>
-                Retour dashboard
+                Retour à l&apos;accueil
               </Link>
             </div>
           </CardContent>
@@ -404,10 +404,10 @@ export function WaitingRoomClient({
                 Retour
               </Link>
               <Badge className="rounded-full border border-primary/20 bg-primary/10 text-primary">
-                Salon de jeu
+                Partie privée
               </Badge>
               <div className="space-y-2">
-                <h1 className="text-4xl font-semibold text-white">Prépare le lancement de la draft</h1>
+                <h1 className="text-4xl font-semibold text-white">Prépare la partie</h1>
                 <p className="text-base leading-7 text-muted-foreground">
                   {GAME_MODES[game.mode].icon} {GAME_MODES[game.mode].label} · {game.budget}M€ · {game.team_size} joueurs
                 </p>
@@ -426,21 +426,19 @@ export function WaitingRoomClient({
           <Card className="border-white/10 bg-white/5 backdrop-blur-xl">
             <CardHeader>
               <CardTitle className="text-2xl text-white">Joueurs</CardTitle>
-              <CardDescription>
-                Le lancement est possible quand les deux présences temps réel passent en ready.
-              </CardDescription>
+              <CardDescription>La partie démarre quand vous êtes tous les deux prêts.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
               <PlayerPanel
                 label="Joueur 1"
-                subtitle="Host"
+                subtitle="Créateur"
                 profile={hostProfile}
                 online={connectedUserIds.has(game.host_id)}
                 ready={Boolean(readyByUserId[game.host_id])}
               />
               <PlayerPanel
                 label="Joueur 2"
-                subtitle="Guest"
+                subtitle="Invité"
                 profile={guestProfile}
                 online={Boolean(game.guest_id && connectedUserIds.has(game.guest_id))}
                 ready={Boolean(game.guest_id && readyByUserId[game.guest_id])}
@@ -451,10 +449,8 @@ export function WaitingRoomClient({
 
           <Card className="border-white/10 bg-white/5 backdrop-blur-xl">
             <CardHeader>
-              <CardTitle className="text-2xl text-white">Contrôles du lobby</CardTitle>
-              <CardDescription>
-                Ready via Presence, lancement par l&apos;hôte, abandon géré côté serveur.
-              </CardDescription>
+              <CardTitle className="text-2xl text-white">Avant de jouer</CardTitle>
+              <CardDescription>Dis quand tu es prêt, puis lance la partie.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-5">
@@ -462,7 +458,7 @@ export function WaitingRoomClient({
                   <div>
                     <p className="text-sm font-medium text-white">Ton statut</p>
                     <p className="text-sm text-muted-foreground">
-                      {isReady ? "Tu es prêt pour le lancement." : "Confirme quand ton setup est prêt."}
+                      {isReady ? "Tu es prêt pour le coup d&apos;envoi." : "Dis-nous quand tu es prêt."}
                     </p>
                   </div>
                   <Badge
@@ -473,7 +469,7 @@ export function WaitingRoomClient({
                         : "border-white/10 bg-white/5 text-muted-foreground",
                     )}
                   >
-                    {isReady ? "Ready" : "Standby"}
+                    {isReady ? "Prêt" : "En attente"}
                   </Badge>
                 </div>
               </div>
@@ -485,7 +481,7 @@ export function WaitingRoomClient({
                 onClick={handleToggleReady}
               >
                 {readyPending ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
-                {isReady ? "Retirer mon ready" : "Je suis prêt"}
+                {isReady ? "Je ne suis plus prêt" : "Je suis prêt"}
               </Button>
 
               {currentUserRole === "host" ? (
@@ -501,14 +497,14 @@ export function WaitingRoomClient({
               ) : (
                 <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-5 text-sm text-muted-foreground">
                   {bothPlayersReady
-                    ? "Le host peut lancer la partie à tout moment."
-                    : "Attends que les deux joueurs soient ready pour permettre le lancement."}
+                    ? "Le créateur peut lancer la partie à tout moment."
+                    : "Attends que vous soyez prêts tous les deux."}
                 </div>
               )}
 
               {game.room_code ? (
                 <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-5">
-                  <p className="text-sm font-medium text-white">Partage ce code</p>
+                  <p className="text-sm font-medium text-white">Code de la partie</p>
                   <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="font-mono text-2xl tracking-[0.3em] text-white">{game.room_code}</p>
                     <Button variant="outline" className="rounded-2xl border-white/10 bg-white/5 hover:bg-white/10" onClick={handleCopyRoomCode}>

@@ -16,7 +16,6 @@ function HistoryCardBody({
   resultTone,
   opponentName,
   timestampLabel,
-  scoreLabel,
   modeLabel,
   modeIcon,
   teamPreview,
@@ -25,7 +24,6 @@ function HistoryCardBody({
   resultTone: ResultTone
   opponentName: string
   timestampLabel: string
-  scoreLabel: string
   modeLabel: string
   modeIcon: string
   teamPreview: string
@@ -39,9 +37,7 @@ function HistoryCardBody({
             <span className="text-sm font-medium text-white">vs {opponentName}</span>
             <span className="text-sm text-muted-foreground">· {timestampLabel}</span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Score: <span className="font-semibold text-white">{scoreLabel}</span> · {modeIcon} {modeLabel}
-          </p>
+          <p className="text-sm text-muted-foreground">{modeIcon} {modeLabel}</p>
           <p className="text-sm text-muted-foreground">Mon équipe: {teamPreview}</p>
         </div>
       </div>
@@ -55,7 +51,6 @@ export function GameHistoryCard({
   resultTone,
   opponentName,
   timestampLabel,
-  scoreLabel,
   modeLabel,
   modeIcon,
   teamPreview,
@@ -65,7 +60,6 @@ export function GameHistoryCard({
   resultTone: ResultTone
   opponentName: string
   timestampLabel: string
-  scoreLabel: string
   modeLabel: string
   modeIcon: string
   teamPreview: string
@@ -78,7 +72,6 @@ export function GameHistoryCard({
           resultTone={resultTone}
           opponentName={opponentName}
           timestampLabel={timestampLabel}
-          scoreLabel={scoreLabel}
           modeLabel={modeLabel}
           modeIcon={modeIcon}
           teamPreview={teamPreview}
@@ -93,7 +86,6 @@ export function GameHistoryCard({
       resultTone={resultTone}
       opponentName={opponentName}
       timestampLabel={timestampLabel}
-      scoreLabel={scoreLabel}
       modeLabel={modeLabel}
       modeIcon={modeIcon}
       teamPreview={teamPreview}

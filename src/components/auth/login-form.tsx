@@ -111,7 +111,7 @@ export function LoginForm({
                 Reprends le contrôle du draft.
               </h1>
               <p className="text-lg leading-8 text-muted-foreground">
-                Connecte-toi pour lancer une partie rapide, ouvrir un salon privé et suivre tes stats ELO.
+                Connecte-toi pour lancer une partie rapide, inviter un ami et suivre ton classement.
               </p>
             </div>
           </div>
@@ -119,13 +119,13 @@ export function LoginForm({
             {[
               {
                 icon: Trophy,
-                title: "Live duels",
-                description: "Bids en temps réel contre un autre coach.",
+                title: "Duels rapides",
+                description: "Des enchères simples face à un autre coach.",
               },
               {
                 icon: Shield,
-                title: "Profils synchronisés",
-                description: "Stats, historique et progression sauvegardés.",
+                title: "Profil sauvegardé",
+                description: "Ton historique et ta progression restent avec toi.",
               },
             ].map(({ icon: FeatureIcon, title, description }) => (
               <div key={title} className="rounded-2xl border border-white/10 bg-black/25 p-5">
@@ -145,7 +145,7 @@ export function LoginForm({
             <div className="space-y-2">
               <CardTitle className="text-3xl text-white">Se connecter</CardTitle>
               <CardDescription className="text-base leading-7 text-muted-foreground">
-                Email et mot de passe pour accéder au dashboard et aux enchères live.
+                Entre ton email et ton mot de passe pour rejouer tout de suite.
               </CardDescription>
             </div>
             {confirmation ? (

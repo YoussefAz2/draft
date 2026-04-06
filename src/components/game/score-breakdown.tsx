@@ -7,10 +7,10 @@ import { AnimatedCounter } from "@/components/game/animated-counter"
 import type { TeamScore } from "@/lib/utils/scoring"
 
 const scoreItems = [
-  { key: "qualityScore", label: "Qualité", icon: Medal, max: 40 },
-  { key: "balanceScore", label: "Équilibre", icon: ShieldCheck, max: 25 },
-  { key: "chemistryScore", label: "Chimie", icon: Sparkles, max: 25 },
-  { key: "budgetScore", label: "Budget", icon: Coins, max: 10 },
+  { key: "qualityScore", label: "⭐ Qualité", icon: Medal, max: 40 },
+  { key: "balanceScore", label: "⚖️ Équilibre", icon: ShieldCheck, max: 25 },
+  { key: "chemistryScore", label: "🔗 Synergies", icon: Sparkles, max: 25 },
+  { key: "budgetScore", label: "💰 Économies", icon: Coins, max: 10 },
 ] as const satisfies ReadonlyArray<{
   key: keyof Pick<TeamScore, "qualityScore" | "balanceScore" | "chemistryScore" | "budgetScore">
   label: string

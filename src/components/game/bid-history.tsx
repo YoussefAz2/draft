@@ -9,8 +9,7 @@ export function BidHistory({ history, myId }: { history: BidHistoryEntry[]; myId
   return (
     <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Historique</p>
-        <p className="text-xs text-muted-foreground">Round en cours</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Dernières enchères</p>
       </div>
       <div className="mt-4 space-y-2">
         {history.length ? (
@@ -39,7 +38,7 @@ export function BidHistory({ history, myId }: { history: BidHistoryEntry[]; myId
           })
         ) : (
           <div className="rounded-2xl border border-dashed border-white/10 px-3 py-4 text-sm text-muted-foreground">
-            Aucune enchère pour le moment.
+            Personne n&apos;a enchéri
           </div>
         )}
       </div>
