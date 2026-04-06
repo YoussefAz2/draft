@@ -11,7 +11,7 @@ import type { Database } from "@/lib/types/database"
 type GameInsert = Database["public"]["Tables"]["games"]["Insert"]
 type GamePlayerInsert = Database["public"]["Tables"]["game_players"]["Insert"]
 type GameUpdate = Database["public"]["Tables"]["games"]["Update"]
-type PlayerCategory = Database["public"]["Tables"]["players"]["Row"]["category"]
+type PlayerModeTag = Database["public"]["Tables"]["players"]["Row"]["mode_tags"][number]
 
 type PlayerRole = "host" | "guest"
 
@@ -20,12 +20,12 @@ const VALID_ROOM_CODE = /^[A-Z0-9]{6}$/
 const ALLOWED_BUDGETS = [150, 200, 250, 300, 500] as const
 const ALLOWED_TEAM_SIZES = [3, 5, 7] as const
 const VALID_GAME_MODES = Object.keys(GAME_MODES) as GameMode[]
-const GAME_MODE_CATEGORIES: Partial<Record<GameMode, PlayerCategory>> = {
-  star_players: "star",
-  legends: "legend",
-  future_stars: "future",
-  africa_only: "african",
-  low_budget: "underrated",
+const GAME_MODE_TAGS: Partial<Record<GameMode, PlayerModeTag>> = {
+  star_players: "star_players",
+  legends: "legends",
+  future_stars: "future_stars",
+  africa_only: "africa_only",
+  low_budget: "low_budget",
 }
 
 function requireServerEnv() {
@@ -361,7 +361,7 @@ export async function initializeGame(gameId: string) {
 
   const totalPlayers = game.team_size * 2 + 3
   const totalRounds = game.team_size * 2
-  const category = GAME_MODE_CATEGORIES[game.mode]
+  const modeTag = GAME_MODE_TAGS[game.mode]
 
   let playerQuery = supabase
     .from("players")
@@ -369,8 +369,8 @@ export async function initializeGame(gameId: string) {
     .order("overall_rating", { ascending: false })
     .limit(Math.max(totalPlayers * 2, totalPlayers))
 
-  if (category) {
-    playerQuery = playerQuery.eq("category", category)
+  if (modeTag) {
+    playerQuery = playerQuery.contains("mode_tags", [modeTag])
   }
 
   const { data: players, error: playersError } = await playerQuery

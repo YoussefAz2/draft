@@ -270,6 +270,9 @@ export interface Database {
           id: number;
           image_url: string | null;
           league: string;
+          mode_tags: Array<
+            'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'
+          >;
           name: string;
           nationality: string;
           nationality_flag: string | null;
@@ -307,9 +310,12 @@ export interface Database {
           created_at?: string | null;
           defending?: number | null;
           dribbling?: number | null;
-          id?: never;
+          id?: number;
           image_url?: string | null;
           league: string;
+          mode_tags?: Array<
+            'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'
+          >;
           name: string;
           nationality: string;
           nationality_flag?: string | null;
@@ -347,9 +353,12 @@ export interface Database {
           created_at?: string | null;
           defending?: number | null;
           dribbling?: number | null;
-          id?: never;
+          id?: number;
           image_url?: string | null;
           league?: string;
+          mode_tags?: Array<
+            'star_players' | 'future_stars' | 'africa_only' | 'low_budget' | 'legends'
+          >;
           name?: string;
           nationality?: string;
           nationality_flag?: string | null;
